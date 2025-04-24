@@ -2,7 +2,7 @@ import { makeRequest } from "@/requests/requests";
 import { defineStore } from "pinia";
 import { ref } from "vue";
 
-export const useManualOrders = defineStore("manual-order", () => {
+export const useManualOrderStore = defineStore("manual-order", () => {
   const endpoint = "manualOrders";
 
   const manualorders = ref([]);
@@ -12,8 +12,7 @@ export const useManualOrders = defineStore("manual-order", () => {
       const response = await makeRequest(endpoint, "GET");
 
       if(response.data){
-        manualorders.value = response.data
-        console.log(manualorders.value)
+        manualorders.value = response.data.orders
       }
     } catch (error) {
         console.log("This is error" ,error)

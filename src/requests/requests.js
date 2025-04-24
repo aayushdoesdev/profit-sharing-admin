@@ -88,6 +88,7 @@ const endpoints = ref({
   manualOrders: '/admin/manual/orders',
   joiners : '/admin/joiners',
   positions : '/admin/positions',
+  
 })
 
 const getApiUrl = (endpoint) => {
