@@ -1,6 +1,7 @@
 <script setup>
 import { ref } from "vue";
 import Popup from "@/components/Popup.vue";
+import Tooltip from "@/components/Tooltip.vue";
 
 const activeSection = ref("orders");
 const showSidebar = ref(false);
@@ -45,6 +46,9 @@ const orders = ref([
     broker: "Dhan",
     brokerId: "DHAN4368HDW9E",
     qty: "0/25",
+    triggerPrice : 'Null',
+    ltp : '200',
+    profit: "5473",
     status: "Successful",
   },
   {
@@ -54,6 +58,9 @@ const orders = ref([
     broker: "Zerodha",
     brokerId: "ZERO8383JSK2",
     qty: "15/15",
+    triggerPrice : 'Null',
+    ltp : '200',
+    profit: "5473",
     status: "Pending",
   },
 ]);
@@ -61,38 +68,24 @@ const orders = ref([
 
 <template>
   <main class="bg-white py-4">
-    <div
-      class="border-b border-black border-opacity-10 flex justify-between items-center nrml-text"
-    >
+    <div class="border-b border-black border-opacity-10 flex justify-between items-center nrml-text">
       <div class="flex items-center gap-8 px-4">
-        <button
-          @click="toggleSections('master-orders')"
-          class="px-4 py-1"
-          :class="{
-            'border-b-2 border-custom-blue text-custom-blue font-semibold':
-              activeSection === 'master-orders',
-          }"
-        >
+        <button @click="toggleSections('master-orders')" class="px-4 py-1" :class="{
+          'border-b-2 border-custom-blue text-custom-blue font-semibold':
+            activeSection === 'master-orders',
+        }">
           Master Orders
         </button>
-        <button
-          @click="toggleSections('orders')"
-          class="px-4 py-1"
-          :class="{
-            'border-b-2 border-custom-blue text-custom-blue font-semibold':
-              activeSection === 'orders',
-          }"
-        >
+        <button @click="toggleSections('orders')" class="px-4 py-1" :class="{
+          'border-b-2 border-custom-blue text-custom-blue font-semibold':
+            activeSection === 'orders',
+        }">
           Orders
         </button>
-        <button
-          @click="toggleSections('positions')"
-          class="px-4 py-1"
-          :class="{
-            'border-b-2 border-custom-blue text-custom-blue font-semibold':
-              activeSection === 'positions',
-          }"
-        >
+        <button @click="toggleSections('positions')" class="px-4 py-1" :class="{
+          'border-b-2 border-custom-blue text-custom-blue font-semibold':
+            activeSection === 'positions',
+        }">
           Positions
         </button>
       </div>
@@ -102,15 +95,11 @@ const orders = ref([
       <!-- !POSITIONS TABLE -->
       <div v-if="activeSection === 'positions'" class="">
         <div class="flex items-center justify-between px-4">
-          <div
-            class="bg-custom-grey flex items-center gap-2 w-fit px-4 rounded-md nrml-text"
-          >
+          <div class="bg-custom-grey flex items-center gap-2 w-fit px-4 rounded-md nrml-text">
             <i class="pi pi-search opacity-50"></i>
-            <input
-              type="text"
-              class="bg-transparent py-1 outline-none"
-              placeholder="Search for user"
-            />
+
+            <input type="text" class="bg-transparent py-1 outline-none" placeholder="Search for user" />
+
           </div>
         </div>
 
@@ -118,8 +107,7 @@ const orders = ref([
           <table class="w-full">
             <thead>
               <tr
-                class="flex items-center justify-between w-full text-left px-4 py-2 text-[14px] font-bold tracking-wide bg-custom-grey text-custom-dark-grey"
-              >
+                class="flex items-center justify-between w-full text-left px-4 py-2 text-[14px] font-bold tracking-wide bg-custom-grey text-custom-dark-grey">
                 <th class="min-w-[50px] w-[5%]">S.NO</th>
                 <th class="min-w-[200px] w-[20%]">Trade ID</th>
                 <th class="min-w-[200px] w-[20%]">Strategy</th>
@@ -131,36 +119,23 @@ const orders = ref([
             </thead>
 
             <tbody>
-              <tr
-                v-for="(pos, index) in positions"
-                :key="pos.tradeId"
-                class="flex items-center justify-between text-left w-full p-4 transition-all nrml-text tracking-wider border-b border-white border-opacity-50"
-              >
+              <tr v-for="(pos, index) in positions" :key="pos.tradeId"
+                class="flex items-center justify-between text-left w-full p-4 transition-all nrml-text tracking-wider border-b border-white border-opacity-50">
                 <td class="min-w-[50px] w-[5%]">{{ index + 1 }}</td>
                 <td class="min-w-[200px] flex items-center gap-2 w-[20%]">
                   <p class="font-medium">{{ pos.tradeId }}</p>
                 </td>
-                <td
-                  class="min-w-[200px] flex flex-col gap-2 font-medium w-[20%]"
-                >
+                <td class="min-w-[200px] flex flex-col gap-2 font-medium w-[20%]">
                   <p>{{ pos.strategy }}</p>
                 </td>
-                <td
-                  class="min-w-[200px] flex flex-col gap-2 font-semibold w-[20%]"
-                >
-                  <div
-                    v-for="trade in pos.trades"
-                    :key="trade.type"
-                    class="flex items-center gap-2"
-                  >
-                    <p
-                      :class="[
-                        'px-1 rounded font-bold',
-                        trade.type === 'B'
-                          ? 'bg-green-100 text-green-600'
-                          : 'bg-red-100 text-red-600',
-                      ]"
-                    >
+                <td class="min-w-[200px] flex flex-col gap-2 font-semibold w-[20%]">
+                  <div v-for="trade in pos.trades" :key="trade.type" class="flex items-center gap-2">
+                    <p :class="[
+                      'px-1 rounded font-bold',
+                      trade.type === 'B'
+                        ? 'bg-green-100 text-green-600'
+                        : 'bg-red-100 text-red-600',
+                    ]">
                       {{ trade.type }}
                     </p>
                     <p>{{ trade.price }}</p>
@@ -174,9 +149,7 @@ const orders = ref([
                     {{ pos.profit }}
                   </p>
                 </td>
-                <td
-                  class="min-w-[200px] w-[15%] flex justify-end items-center gap-4"
-                >
+                <td class="min-w-[200px] w-[15%] flex justify-end items-center gap-4">
                   <button @click="togglePopup(true)" class="sq-off-btn">
                     <i class="pi pi-sync"></i>
                     <p>Square Off</p>
@@ -191,15 +164,10 @@ const orders = ref([
       <!-- !ORDERS TABLE -->
       <div v-if="activeSection === 'orders'" class="">
         <div class="flex items-center justify-between px-4">
-          <div
-            class="bg-custom-grey flex items-center gap-2 w-fit px-4 rounded-md nrml-text"
-          >
+          <div class="bg-custom-grey flex items-center gap-2 w-fit px-4 rounded-md nrml-text">
             <i class="pi pi-search opacity-50"></i>
-            <input
-              type="text"
-              class="bg-transparent py-1 outline-none"
-              placeholder="Search for user"
-            />
+            <input type="text" class="bg-transparent py-1 outline-none" placeholder="Search for user" />
+
           </div>
         </div>
 
@@ -207,8 +175,7 @@ const orders = ref([
           <table class="w-full">
             <thead>
               <tr
-                class="flex items-center justify-between w-full text-left px-4 py-2 text-[14px] font-bold tracking-wide bg-custom-grey text-custom-dark-grey"
-              >
+                class="flex items-center justify-between w-full text-left px-4 py-2 text-[14px] font-bold tracking-wide bg-custom-grey text-custom-dark-grey">
                 <th class="min-w-[50px] w-[5%] font-medium">S.NO</th>
                 <th class="min-w-[200px] w-[20%] font-medium">
                   Strategy / Script
@@ -223,11 +190,8 @@ const orders = ref([
             </thead>
 
             <tbody>
-              <tr
-                v-for="(order, index) in orders"
-                :key="order.script"
-                class="flex items-center justify-between text-left w-full p-4 transition-all nrml-text tracking-wider border-b border-black border-opacity-10 font-medium"
-              >
+              <tr v-for="(order, index) in orders" :key="order.script"
+                class="flex items-center justify-between text-left w-full p-4 transition-all nrml-text tracking-wider border-b border-black border-opacity-10 font-medium">
                 <td class="min-w-[50px] w-[5%]">{{ index + 1 }}</td>
                 <td class="min-w-[200px] w-[20%]">
                   <p>{{ order.strategy }}</p>
@@ -235,14 +199,12 @@ const orders = ref([
                 </td>
                 <td class="min-w-[200px] w-[20%]">
                   <div class="flex items-center gap-2">
-                    <p
-                      :class="[
-                        'px-1 rounded font-bold',
-                        order.side.type === 'B'
-                          ? 'bg-green-100 text-green-600'
-                          : 'bg-red-100 text-red-600',
-                      ]"
-                    >
+                    <p :class="[
+                      'px-1 rounded font-bold',
+                      order.side.type === 'B'
+                        ? 'bg-green-100 text-green-600'
+                        : 'bg-red-100 text-red-600',
+                    ]">
                       {{ order.side.type }}
                     </p>
                     <p>
@@ -259,14 +221,12 @@ const orders = ref([
                   <p>{{ order.qty }}</p>
                 </td>
                 <td class="min-w-[200px] w-[10%] flex justify-end text-[12px]">
-                  <p
-                    :class="[
-                      'px-4 py-[2px] rounded w-fit',
-                      order.status === 'Successful'
-                        ? 'bg-green-100 text-green-600'
-                        : 'bg-yellow-100 text-yellow-700',
-                    ]"
-                  >
+                  <p :class="[
+                    'px-4 py-[2px] rounded w-fit',
+                    order.status === 'Successful'
+                      ? 'bg-green-100 text-green-600'
+                      : 'bg-yellow-100 text-yellow-700',
+                  ]">
                     {{ order.status }}
                   </p>
                 </td>
@@ -277,24 +237,17 @@ const orders = ref([
 
         <!-- Sidebar Overlay -->
         <transition name="slide">
-          <div
-            v-if="showSidebar"
-            class="fixed right-0 top-0 h-full w-[400px] md:w-[800px] bg-white shadow-lg z-50 p-6"
-          >
+          <div v-if="showSidebar" class="fixed right-0 top-0 h-full w-[400px] md:w-[800px] bg-white shadow-lg z-50 p-6">
             <!-- Header -->
             <div class="flex justify-between items-center mb-4">
               <h2 class="text-xl font-bold">Add Manual Order</h2>
               <div class="flex gap-4">
-                <button
-                  @click="showSidebar = false"
-                  class="text-[16px] border border-custom-blue text-custom-blue px-4 py-1 rounded"
-                >
+                <button @click="showSidebar = false"
+                  class="text-[16px] border border-custom-blue text-custom-blue px-4 py-1 rounded">
                   Cancel
                 </button>
-                <button
-                  @click="currentStep = currentStep === 1 ? 2 : 1"
-                  class="text-[16px] bg-custom-blue text-white font-semibold px-4 py-1 rounded"
-                >
+                <button @click="currentStep = currentStep === 1 ? 2 : 1"
+                  class="text-[16px] bg-custom-blue text-white font-semibold px-4 py-1 rounded">
                   Done
                 </button>
               </div>
@@ -388,22 +341,15 @@ const orders = ref([
       <!-- ! MASTER ORDERS -->
       <div v-if="activeSection === 'master-orders'" class="">
         <div class="flex items-center justify-between px-4">
-          <div
-            class="bg-custom-grey flex items-center gap-2 w-fit px-4 rounded-md nrml-text"
-          >
+
+          <div class="bg-custom-grey flex items-center gap-2 w-fit px-4 rounded-md nrml-text">
             <i class="pi pi-search opacity-50"></i>
-            <input
-              type="text"
-              class="bg-transparent py-1 outline-none"
-              placeholder="Search for user"
-            />
+            <input type="text" class="bg-transparent py-1 outline-none" placeholder="Search for user" />
           </div>
 
-          <button
-            v-if="activeSection === 'master-orders'"
-            @click="showSidebar = true"
-            class="btn flex items-center gap-2 nrml-text"
-          >
+          <button v-if="activeSection === 'master-orders'" @click="showSidebar = true"
+            class="btn flex items-center gap-2 nrml-text">
+
             <i class="pi pi-plus"></i>
             <p>Place Order</p>
           </button>
@@ -412,46 +358,39 @@ const orders = ref([
           <table class="w-full">
             <thead>
               <tr
-                class="flex items-center justify-between w-full text-left px-4 py-2 text-[14px] font-bold tracking-wide bg-custom-grey text-custom-dark-grey"
-              >
-                <th class="min-w-[50px] w-[5%] font-medium">S.NO</th>
-                <th class="min-w-[200px] w-[20%] font-medium">
-                  Strategy / Script
-                </th>
-                <th class="min-w-[200px] w-[20%] font-medium">Side / Price</th>
-                <th class="min-w-[200px] w-[20%] font-medium">Broker / ID</th>
-                <th class="min-w-[100px] w-[10%] font-medium">QTY</th>
-                <th class="min-w-[100px] w-[10%] font-medium">LTP</th>
-                <th class="min-w-[100px] w-[10%] font-medium">Trigger Price</th>
-                <th class="min-w-[100px] w-[10%] font-medium">Profit</th>
-                <th class="min-w-[100px] w-[10%] font-medium">Status</th>
-                <th class="min-w-[200px] text-right w-[10%] font-medium">
-                  Status
-                </th>
+
+                class="flex items-center justify-between w-full text-left px-4 py-2 text-[14px] font-bold tracking-wide bg-custom-grey text-custom-dark-grey">
+                <th class="w-[5%] text-left font-medium">S.NO</th>
+                <th class="w-[15%] font-medium">Strategy / Script</th>
+                <th class="w-[20%] font-medium">Side / Price</th>
+                <th class="w-[15%] font-medium">QTY</th>
+                <th class="w-[10%] font-medium">LTP</th>
+                <th class="w-[10%] font-medium">Trigger Price</th>
+                <th class="w-[10%] font-medium">Profit</th>
+                <th class="w-[10%] font-medium">Status</th>
+                <th class="w-[10%] text-right font-medium">Action</th>
+
               </tr>
             </thead>
 
             <tbody>
-              <tr
-                v-for="(order, index) in orders"
-                :key="order.script"
-                class="flex items-center justify-between text-left w-full p-4 transition-all nrml-text tracking-wider border-b border-black border-opacity-10 font-medium"
-              >
-                <td class="min-w-[50px] w-[5%]">{{ index + 1 }}</td>
-                <td class="min-w-[200px] w-[20%]">
+
+              <tr v-for="(order, index) in orders" :key="order.script"
+                class="flex items-center justify-between text-left w-full p-4 transition-all nrml-text tracking-wider border-b border-black border-opacity-10 font-medium">
+                <td class="w-[5%] text-left">{{ index + 1 }}</td>
+                <td class="w-[15%]">
                   <p>{{ order.strategy }}</p>
                   <p>{{ order.script }}</p>
                 </td>
-                <td class="min-w-[200px] w-[20%]">
+                <td class="w-[20%]">
                   <div class="flex items-center gap-2">
-                    <p
-                      :class="[
-                        'px-1 rounded font-bold',
-                        order.side.type === 'B'
-                          ? 'bg-green-100 text-green-600'
-                          : 'bg-red-100 text-red-600',
-                      ]"
-                    >
+                    <p :class="[
+                      'px-1 rounded font-bold',
+                      order.side.type === 'B'
+                        ? 'bg-green-100 text-green-600'
+                        : 'bg-red-100 text-red-600',
+                    ]">
+
                       {{ order.side.type }}
                     </p>
                     <p>
@@ -460,25 +399,30 @@ const orders = ref([
                     </p>
                   </div>
                 </td>
-                <td class="min-w-[200px] w-[20%]">
-                  <p>{{ order.broker }}</p>
-                  <p>{{ order.brokerId }}</p>
-                </td>
-                <td class="min-w-[100px] w-[10%]">
-                  <p>{{ order.qty }}</p>
-                </td>
-                <td class="min-w-[200px] w-[10%] flex justify-end text-[12px]">
-                  <p
-                    :class="[
-                      'px-4 py-[2px] rounded w-fit',
-                      order.status === 'Successful'
-                        ? 'bg-green-100 text-green-600'
-                        : 'bg-yellow-100 text-yellow-700',
-                    ]"
-                  >
+
+                <td class="w-[15%]">{{ order.qty }}</td>
+                <td class="w-[10%]">{{ order.ltp }}</td>
+                <td class="w-[10%]">{{ order.triggerPrice }}</td>
+                <td class="w-[10%]" :class="{'text-custom-green' : order.profit >= 0 , 'text-custom-red' : order.profit < 0}">{{ order.profit > 0 ? `+${order.profit}` : order.profit }}</td>
+                <td class="w-[10%]">
+                  <p :class="[
+                    'px-4 py-[2px] rounded w-fit',
+                    order.status === 'Successful'
+                      ? 'bg-green-100 text-green-600'
+                      : 'bg-yellow-100 text-yellow-700',
+                  ]">
                     {{ order.status }}
                   </p>
                 </td>
+                <td class="w-[10%] text-center flex justify-end items-center gap-4">
+                  <Tooltip text="Edit">
+                    <button class="pi pi-pen-to-square text-custom-blue text-[16px]"></button>
+                  </Tooltip>
+                  <Tooltip text="View">
+                    <button class="pi pi-eye text-[16px]"></button>
+                  </Tooltip>
+                </td>
+
               </tr>
             </tbody>
           </table>
@@ -488,9 +432,7 @@ const orders = ref([
       <Popup :isOpen="isPopupOpen" @close="togglePopup(false)">
         <img src="/svg/sq-off-img.svg" alt="" class="w-[200px] mx-auto" />
 
-        <div
-          class="flex flex-col items-center justify-center text-center gap-4 w-full mt-4"
-        >
+        <div class="flex flex-col items-center justify-center text-center gap-4 w-full mt-4">
           <div class="">
             <h2 class="heading-text">Are you sure you want to square off?</h2>
             <p class="nrml-text">
@@ -499,10 +441,8 @@ const orders = ref([
           </div>
 
           <div class="flex items-center gap-2 w-full">
-            <button
-              @click="togglePopup(false)"
-              class="w-full border border-custom-blue text-custom-blue py-1 rounded-full"
-            >
+            <button @click="togglePopup(false)"
+              class="w-full border border-custom-blue text-custom-blue py-1 rounded-full">
               Cancel
             </button>
             <button class="w-full bg-custom-blue text-white py-1 rounded-full">
@@ -519,18 +459,23 @@ const orders = ref([
 .clip-right-arrow {
   clip-path: polygon(0 0, 100% 50%, 0 100%);
 }
+
 .slide-enter-from {
   transform: translateX(100%);
 }
+
 .slide-enter-to {
   transform: translateX(0%);
 }
+
 .slide-leave-from {
   transform: translateX(0%);
 }
+
 .slide-leave-to {
   transform: translateX(100%);
 }
+
 .slide-enter-active,
 .slide-leave-active {
   transition: transform 0.3s ease;
