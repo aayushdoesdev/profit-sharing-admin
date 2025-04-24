@@ -2,10 +2,6 @@
 import { ref } from "vue";
 import Popup from "@/components/Popup.vue";
 import Tooltip from "@/components/Tooltip.vue";
-import {useManualOrders} from "@/stores/manualOrders";
-
-const manualOrdersStore = useManualOrders()
-
 
 const activeSection = ref("orders");
 const showSidebar = ref(false);
@@ -23,22 +19,34 @@ const positions = ref([
   {
     tradeId: "FER527SJ2SJ2929",
     strategy: "Most profitable source",
+    script: "BTC/USD 54368OOCE",
     trades: [
-      { type: "B", price: 8329.89 },
-      { type: "S", price: 8329.89 },
+      { type: "B", price: 8329.89, time: "09:09AM/12 Mar" },
+      { type: "S", price: 8329.89, time: "09:09AM/12 Mar" },
     ],
-    broker: "32",
+    broker: "Zerodha",
     profit: "+5473",
+    user: 'Roshni Chandra',
+    product: 'Intraday',
+    qty: '25',
+    exchange: 'NSE',
+    status: 'open',
   },
   {
+    script: "BTC/USD 54368OOCE",
     tradeId: "RTY83929JS2A838",
     strategy: "BankNifty Beast",
     trades: [
-      { type: "B", price: 7400.12 },
-      { type: "S", price: 7650.5 },
+      { type: "B", price: 7400.12, time: "09:09AM/12 Mar" },
+      { type: "S", price: 7650.5, time: "09:09AM/12 Mar" },
     ],
     broker: "Zerodha",
     profit: "+250.38",
+    user: 'Roshni Chandra',
+    product: 'Intraday',
+    qty: '25',
+    exchange: 'NSE',
+    status: 'open',
   },
 ]);
 
@@ -50,8 +58,8 @@ const orders = ref([
     broker: "Dhan",
     brokerId: "DHAN4368HDW9E",
     qty: "0/25",
-    triggerPrice : 'Null',
-    ltp : '200',
+    triggerPrice: 'Null',
+    ltp: '200',
     profit: "5473",
     status: "Successful",
   },
@@ -62,8 +70,8 @@ const orders = ref([
     broker: "Zerodha",
     brokerId: "ZERO8383JSK2",
     qty: "15/15",
-    triggerPrice : 'Null',
-    ltp : '200',
+    triggerPrice: 'Null',
+    ltp: '200',
     profit: "5473",
     status: "Pending",
   },
@@ -71,7 +79,7 @@ const orders = ref([
 </script>
 
 <template>
-  <main class="bg-white py-4">
+  <main class="bg-white py-4 min-h-[80%]">
     <div class="border-b border-black border-opacity-10 flex justify-between items-center nrml-text">
       <div class="flex items-center gap-8 px-4">
         <button @click="toggleSections('master-orders')" class="px-4 py-1" :class="{
@@ -95,7 +103,7 @@ const orders = ref([
       </div>
     </div>
 
-    {{ manualOrdersStore }}
+
     <div class="mt-4">
       <!-- !POSITIONS TABLE -->
       <div v-if="activeSection === 'positions'" class="">
@@ -113,13 +121,16 @@ const orders = ref([
             <thead>
               <tr
                 class="flex items-center justify-between w-full text-left px-4 py-2 text-[14px] font-bold tracking-wide bg-custom-grey text-custom-dark-grey">
-                <th class="min-w-[50px] w-[5%]">S.NO</th>
-                <th class="min-w-[200px] w-[20%]">Trade ID</th>
-                <th class="min-w-[200px] w-[20%]">Strategy</th>
-                <th class="min-w-[200px] w-[20%]">Trade Type</th>
-                <th class="min-w-[100px] w-[10%]">Broker</th>
-                <th class="min-w-[100px] w-[10%]">Profit</th>
-                <th class="min-w-[200px] text-right w-[15%]">Action</th>
+                <th class="min-w-[50px] w-[5%] text-left">S.NO</th>
+                <th class="min-w-[160px] w-[15%] text-left">Strategy/Symbol</th>
+                <th class="min-w-[160px] w-[15%] text-left">Side/Price</th>
+                <th class="min-w-[120px] w-[10%] text-left">User/Broker</th>
+                <th class="min-w-[100px] w-[5%] text-left ">Product</th>
+                <th class="min-w-[70px] w-[5%] text-left">QTY</th>
+                <th class="min-w-[100px] w-[5%] text-left">Exchange</th>
+                <th class="min-w-[100px] w-[5%] text-left">Status</th>
+                <th class="min-w-[80px] w-[5%] text-left">PNL</th>
+                <th class="min-w-[120px] w-[10%] text-right">Action</th>
               </tr>
             </thead>
 
@@ -127,38 +138,55 @@ const orders = ref([
               <tr v-for="(pos, index) in positions" :key="pos.tradeId"
                 class="flex items-center justify-between text-left w-full p-4 transition-all nrml-text tracking-wider border-b border-white border-opacity-50">
                 <td class="min-w-[50px] w-[5%]">{{ index + 1 }}</td>
-                <td class="min-w-[200px] flex items-center gap-2 w-[20%]">
-                  <p class="font-medium">{{ pos.tradeId }}</p>
-                </td>
-                <td class="min-w-[200px] flex flex-col gap-2 font-medium w-[20%]">
+                <td class="min-w-[160px] w-[15%] font-medium">
                   <p>{{ pos.strategy }}</p>
+                  <p>{{ pos.script }}</p>
                 </td>
-                <td class="min-w-[200px] flex flex-col gap-2 font-semibold w-[20%]">
-                  <div v-for="trade in pos.trades" :key="trade.type" class="flex items-center gap-2">
+                <td class="min-w-[160px] w-[15%]">
+                  <div v-for="trade in pos.trades" :key="trade.type" class="flex items-center gap-2 mb-1">
                     <p :class="[
-                      'px-1 rounded font-bold',
+                      'px-1 rounded font-bold ',
                       trade.type === 'B'
                         ? 'bg-green-100 text-green-600'
                         : 'bg-red-100 text-red-600',
                     ]">
                       {{ trade.type }}
                     </p>
-                    <p>{{ trade.price }}</p>
+                    <p class="font-medium">{{ trade.price }} <span class="text-[10px] text-custom-dark-grey">{{ trade.time }}</span></p>
                   </div>
                 </td>
-                <td class="min-w-[100px] w-[10%]">
-                  <p class="font-bold rounded w-fit">{{ pos.broker }}</p>
+                <td class="min-w-[120px] w-[10%]">
+                  <p class="font-medium">{{ pos.user }}</p>
+                  <p class="font-medium">{{ pos.broker }}</p>
                 </td>
-                <td class="min-w-[100px] w-[10%]">
-                  <p class="text-green-600 font-bold rounded w-fit">
+                <td class="min-w-[100px] w-[5%]">
+                  <p class="font-medium">{{ pos.product }}</p>
+                </td>
+                <td class="min-w-[70px] w-[5%]">
+                  <p class="font-medium">{{ pos.qty }}</p>
+                </td>
+                <td class="min-w-[100px] w-[5%]">
+                  <p class="font-medium">{{ pos.exchange }}</p>
+                </td>
+                <td class="min-w-[100px] w-[5%]">
+                  <p class="font-medium p-1 rounded-lg w-fit"
+                    :class="{ 'bg-custom-green/5 text-custom-green': pos.status.toLowerCase() === 'open' }">
+                    {{ pos.status }}
+                  </p>
+                </td>
+                <td class="min-w-[80px] w-[5%] ">
+                  <p class="text-green-600 font-bold">
                     {{ pos.profit }}
                   </p>
                 </td>
-                <td class="min-w-[200px] w-[15%] flex justify-end items-center gap-4">
-                  <button @click="togglePopup(true)" class="sq-off-btn">
+                <td class="min-w-[120px] w-[10%] flex justify-end items-center gap-2 ">
+                  <button @click="togglePopup(true)" class="sq-off-btn flex items-center gap-1">
                     <i class="pi pi-sync"></i>
-                    <p>Square Off</p>
+                    <p>Sq Off</p>
                   </button>
+                  <Tooltip text="View">
+                    <button class="pi pi-eye text-[16px]"></button>
+                  </Tooltip>
                 </td>
               </tr>
             </tbody>
@@ -177,20 +205,18 @@ const orders = ref([
         </div>
 
         <div class="mt-4 overflow-x-auto">
-          <table class="w-full">
+          <table class="w-[99%]">
             <thead>
               <tr
                 class="flex items-center justify-between w-full text-left px-4 py-2 text-[14px] font-bold tracking-wide bg-custom-grey text-custom-dark-grey">
                 <th class="min-w-[50px] w-[5%] font-medium">S.NO</th>
-                <th class="min-w-[200px] w-[20%] font-medium">
-                  Strategy / Script
-                </th>
-                <th class="min-w-[200px] w-[20%] font-medium">Side / Price</th>
-                <th class="min-w-[200px] w-[20%] font-medium">Broker / ID</th>
-                <th class="min-w-[100px] w-[10%] font-medium">QTY</th>
-                <th class="min-w-[200px] text-right w-[10%] font-medium">
-                  Status
-                </th>
+                <th class="min-w-[180px] w-[15%] font-medium">Strategy / Script</th>
+                <th class="min-w-[180px] w-[20%] font-medium">Side / Price</th>
+                <th class="min-w-[150px] w-[15%] font-medium">Broker / ID</th>
+                <th class="min-w-[80px] w-[10%] font-medium">QTY</th>
+                <th class="min-w-[100px] w-[10%] font-medium">Trigger Price</th>
+                <th class="min-w-[100px] w-[10%] font-medium text-right">Status</th>
+                <th class="min-w-[100px] w-[10%] font-medium text-right">Action</th>
               </tr>
             </thead>
 
@@ -198,11 +224,11 @@ const orders = ref([
               <tr v-for="(order, index) in orders" :key="order.script"
                 class="flex items-center justify-between text-left w-full p-4 transition-all nrml-text tracking-wider border-b border-black border-opacity-10 font-medium">
                 <td class="min-w-[50px] w-[5%]">{{ index + 1 }}</td>
-                <td class="min-w-[200px] w-[20%]">
+                <td class="min-w-[180px] w-[15%] ">
                   <p>{{ order.strategy }}</p>
                   <p>{{ order.script }}</p>
                 </td>
-                <td class="min-w-[200px] w-[20%]">
+                <td class="min-w-[180px] w-[20%]">
                   <div class="flex items-center gap-2">
                     <p :class="[
                       'px-1 rounded font-bold',
@@ -218,14 +244,17 @@ const orders = ref([
                     </p>
                   </div>
                 </td>
-                <td class="min-w-[200px] w-[20%]">
+                <td class="min-w-[150px] w-[15%]">
                   <p>{{ order.broker }}</p>
                   <p>{{ order.brokerId }}</p>
                 </td>
-                <td class="min-w-[100px] w-[10%]">
+                <td class="min-w-[80px] w-[10%]">
                   <p>{{ order.qty }}</p>
                 </td>
-                <td class="min-w-[200px] w-[10%] flex justify-end text-[12px]">
+                <td class="min-w-[100px] w-[10%]">
+                  {{ order.triggerPrice }}
+                </td>
+                <td class="min-w-[100px] w-[10%] flex justify-end text-[12px]">
                   <p :class="[
                     'px-4 py-[2px] rounded w-fit',
                     order.status === 'Successful'
@@ -234,6 +263,14 @@ const orders = ref([
                   ]">
                     {{ order.status }}
                   </p>
+                </td>
+                <td class="min-w-[100px] w-[10%] flex items-center justify-end gap-2">
+                  <Tooltip text="View">
+                    <button class="pi pi-eye text-[16px]"></button>
+                  </Tooltip>
+                  <Tooltip text="Delete">
+                    <button class="pi pi-trash text-red-500 text-[16px]"></button>
+                  </Tooltip>
                 </td>
               </tr>
             </tbody>
@@ -363,7 +400,6 @@ const orders = ref([
           <table class="w-full">
             <thead>
               <tr
-
                 class="flex items-center justify-between w-full text-left px-4 py-2 text-[14px] font-bold tracking-wide bg-custom-grey text-custom-dark-grey">
                 <th class="w-[5%] text-left font-medium">S.NO</th>
                 <th class="w-[15%] font-medium">Strategy / Script</th>
@@ -408,7 +444,9 @@ const orders = ref([
                 <td class="w-[15%]">{{ order.qty }}</td>
                 <td class="w-[10%]">{{ order.ltp }}</td>
                 <td class="w-[10%]">{{ order.triggerPrice }}</td>
-                <td class="w-[10%]" :class="{'text-custom-green' : order.profit >= 0 , 'text-custom-red' : order.profit < 0}">{{ order.profit > 0 ? `+${order.profit}` : order.profit }}</td>
+                <td class="w-[10%]"
+                  :class="{ 'text-custom-green': order.profit >= 0, 'text-custom-red': order.profit < 0 }">{{
+                    order.profit > 0 ? `+${order.profit}` : order.profit }}</td>
                 <td class="w-[10%]">
                   <p :class="[
                     'px-4 py-[2px] rounded w-fit',
