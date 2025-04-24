@@ -1,6 +1,7 @@
 <script setup>
 import { ref } from "vue";
 import Popup from "@/components/Popup.vue";
+import Tooltip from "@/components/Tooltip.vue";
 
 const showSidebar = ref(false);
 const currentStep = ref(1); // 1 = Add User, 2 = Add Broker
@@ -19,32 +20,14 @@ const strategies = ref([
   {
     id: 1,
     name: "Most profitable plan",
+    type: "Options",
     expiry: "12 Mar 2025",
-    exchange: "NFO",
-    pnl: "+₹1,200",
-    status: "Open",
-    pnlColor: "text-custom-green",
-    statusColor: "bg-green-100 text-custom-green",
-  },
-  {
-    id: 2,
-    name: "Scalping 15min",
-    expiry: "25 Apr 2025",
-    exchange: "BSE",
-    pnl: "-₹850",
-    status: "Closed",
-    pnlColor: "text-custom-red",
-    statusColor: "bg-red-100 text-custom-red",
-  },
-  {
-    id: 3,
-    name: "Options Intraday",
-    expiry: "02 May 2025",
-    exchange: "NSE",
-    pnl: "+₹3,400",
-    status: "Open",
-    pnlColor: "text-custom-green",
-    statusColor: "bg-green-100 text-custom-green",
+    script: "NIFTY",
+    entry: "18500",
+    exit: "19200",
+    ltp: "18700",
+    positionStatus: "Active",
+    active: true,
   },
 ]);
 </script>
@@ -73,15 +56,17 @@ const strategies = ref([
       <table class="w-full">
         <thead>
           <tr
-            class="flex items-center justify-between w-full text-left px-4 py-3 text-[14px] font-bold tracking-wide bg-custom-grey text-custom-dark-grey"
+            class="flex items-center justify-between w-full text-left px-4 py-2 text-[14px] font-bold tracking-wide bg-custom-grey text-custom-dark-grey"
           >
             <th class="min-w-[50px] w-[5%] font-medium">S.NO</th>
-            <th class="min-w-[200px] w-[20%] font-medium">Strategy Name</th>
-            <th class="min-w-[150px] w-[10%] font-medium">Expiry</th>
-            <th class="min-w-[100px] w-[10%] font-medium">Exchange</th>
-            <th class="min-w-[100px] w-[10%] font-medium">PNL</th>
-            <th class="min-w-[150px] w-[10%] font-medium">Status</th>
-            <th class="min-w-[150px] text-right w-[15%] font-medium">Action</th>
+            <th class="min-w-[150px] w-[10%] font-medium">Name</th>
+            <th class="min-w-[100px] w-[10%] font-medium">Type</th>
+            <th class="min-w-[120px] w-[10%] font-medium">Expiry</th>
+            <th class="min-w-[100px] w-[10%] font-medium">Entry / Exit</th>
+            <th class="min-w-[100px] w-[10%] font-medium">LTP</th>
+            <th class="min-w-[120px] w-[10%] font-medium">Status</th>
+            <th class="min-w-[100px] w-[10%] font-medium">Active</th>
+            <th class="min-w-[100px] text-right w-[10%] font-medium">Action</th>
           </tr>
         </thead>
 
@@ -89,44 +74,54 @@ const strategies = ref([
           <tr
             v-for="(strategy, index) in strategies"
             :key="strategy.id"
-            class="flex items-center justify-between text-left w-full p-4 transition-all nrml-text tracking-wider border-b border-black border-opacity-10"
+            class="flex items-center justify-between text-left w-full p-4 transition-all nrml-text tracking-wider border-b border-black border-opacity-10 font-medium"
           >
             <td class="min-w-[50px] w-[5%]">{{ index + 1 }}</td>
-            <td class="min-w-[200px] flex items-center gap-2 w-[20%]">
-              <p class="font-medium">{{ strategy.name }}</p>
+            <td class="min-w-[150px] w-[10%]">
+              <p>{{ strategy.name }}</p>
+              <p>{{ strategy.script }}</p>
             </td>
-            <td class="min-w-[150px] flex flex-col gap-2 font-medium w-[10%]">
-              <p>{{ strategy.expiry }}</p>
+            <td class="min-w-[100px] w-[10%]">{{ strategy.type }}</td>
+            <td class="min-w-[100px] w-[10%]">{{ strategy.expiry }}</td>
+            <td class="min-w-[100px] w-[10%]">
+              <p>₹{{ strategy.entry }}</p>
+              <p>₹{{ strategy.exit }}</p>
             </td>
-            <td class="min-w-[100px] font-medium w-[10%]">
-              {{ strategy.exchange }}
+            <td class="min-w-[100px] w-[10%]">₹{{ strategy.ltp }}</td>
+            <td class="min-w-[120px] w-[10%]">
+              <span
+                class="px-3 py-1 rounded-full bg-green-100 text-green-600"
+                >{{ strategy.positionStatus }}</span
+              >
             </td>
             <td class="min-w-[100px] w-[10%]">
-              <p :class="`${strategy.pnlColor} font-bold`">
-                {{ strategy.pnl }}
-              </p>
+              <label class="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" class="sr-only peer" />
+                <div
+                  class="w-10 h-5 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:bg-blue-500 transition-colors duration-300"
+                ></div>
+                <div
+                  class="absolute left-0.5 top-0.5 w-4 h-4 bg-white rounded-full transition-transform duration-300 transform peer-checked:translate-x-5"
+                ></div>
+              </label>
             </td>
-            <td class="min-w-[150px] w-[10%]">
-              <p
-                :class="`${strategy.statusColor} font-bold px-2 py-[2px] rounded w-fit`"
-              >
-                {{ strategy.status }}
-              </p>
-            </td>
-            <td
-              class="min-w-[150px] w-[15%] flex items-center justify-end gap-4"
-            >
-              <button @click="toggleSqoffPopup(true)" class="sq-off-btn">
-                <i class="pi pi-sync"></i>
-                <p>Square Off</p>
-              </button>
-              <button
-                class="pi pi-pen-to-square text-custom-blue text-[20px]"
-              ></button>
-              <button
-                @click="toggleDeletePopup(true)"
-                class="pi pi-trash text-custom-red text-[20px]"
-              ></button>
+            <td class="min-w-[100px] flex w-[10%] gap-4">
+              <Tooltip text="Edit">
+                <button class="pi pi-pencil text-[18px]"></button>
+              </Tooltip>
+              
+              <Tooltip text="Joiner">
+                <button class="pi pi-pencil text-[18px]"></button>
+              </Tooltip>
+
+              <Tooltip text="Order">
+                <button class="pi pi-briefcase text-[18px]"></button>
+              </Tooltip>
+
+              <Tooltip text="Delete">
+                <button class="pi pi-trash text-[18px]"></button>
+              </Tooltip>
+
             </td>
           </tr>
         </tbody>
@@ -180,11 +175,23 @@ const strategies = ref([
                 <input type="text" class="custom-input" />
               </div>
               <div>
+                <label class="opacity-70">Image Icon</label>
+                <input type="text" class="custom-input" />
+              </div>
+              <div>
                 <label class="opacity-70">Script</label>
                 <input type="text" class="custom-input" />
               </div>
               <div>
+                <label class="opacity-70">Capital Required</label>
+                <input type="text" class="custom-input" />
+              </div>
+              <div>
                 <label class="opacity-70">Risk</label>
+                <input type="text" class="custom-input" />
+              </div>
+              <div>
+                <label class="opacity-70">Message</label>
                 <input type="text" class="custom-input" />
               </div>
               <div>
@@ -199,9 +206,41 @@ const strategies = ref([
                 <label class="opacity-70">ATM / OTM</label>
                 <input type="text" class="custom-input" />
               </div>
-              <div>
-                <label class="opacity-70">Trailing Active</label>
-                <input type="text" class="custom-input" />
+              <div class="flex flex-col items-start gap-1">
+                <p class="opacity-70">Traling Active</p>
+                <label class="relative inline-flex items-center cursor-pointer">
+                  <input type="checkbox" class="sr-only peer" />
+                  <div
+                    class="w-10 h-5 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:bg-blue-500 transition-colors duration-300"
+                  ></div>
+                  <div
+                    class="absolute left-0.5 top-0.5 w-4 h-4 bg-white rounded-full transition-transform duration-300 transform peer-checked:translate-x-5"
+                  ></div>
+                </label>
+              </div>
+              <div class="flex flex-col items-start gap-1">
+                <p class="opacity-70">Is Active</p>
+                <label class="relative inline-flex items-center cursor-pointer">
+                  <input type="checkbox" class="sr-only peer" />
+                  <div
+                    class="w-10 h-5 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:bg-blue-500 transition-colors duration-300"
+                  ></div>
+                  <div
+                    class="absolute left-0.5 top-0.5 w-4 h-4 bg-white rounded-full transition-transform duration-300 transform peer-checked:translate-x-5"
+                  ></div>
+                </label>
+              </div>
+              <div class="flex flex-col items-start gap-1">
+                <p class="opacity-70">Is Locked</p>
+                <label class="relative inline-flex items-center cursor-pointer">
+                  <input type="checkbox" class="sr-only peer" />
+                  <div
+                    class="w-10 h-5 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:bg-blue-500 transition-colors duration-300"
+                  ></div>
+                  <div
+                    class="absolute left-0.5 top-0.5 w-4 h-4 bg-white rounded-full transition-transform duration-300 transform peer-checked:translate-x-5"
+                  ></div>
+                </label>
               </div>
             </div>
 

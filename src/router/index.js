@@ -15,6 +15,7 @@ import TradeHistoryView from "@/views/tradeHistory/Main.vue";
 import ReportsView from "@/views/reports/Main.vue";
 import ManualOrders from "@/views/manualOrders/Main.vue"
 import ProfileView from "@/views/profile/Main.vue"
+import BrokersView from "@/views/brokers/Main.vue"
 
 import LoginView from "@/views/auth/login/Main.vue";
 import RegistrationView from "@/views/auth/registration/Main.vue";
@@ -47,6 +48,11 @@ const router = createRouter({
           path: "/strategies",
           name: "strategies",
           component: StrategiesView,
+        },
+        {
+          path: "/brokers",
+          name: "brokers",
+          component: BrokersView,
         },
         {
           path: "/reports",

@@ -28,6 +28,11 @@ const routes = [
     img: "/svg/strategies.svg"
   },
   {
+    name: "Brokers",
+    path: "/brokers",
+    img: "/svg/strategies.svg"
+  },
+  {
     name: "Calender",
     path: "/calender",
   },
