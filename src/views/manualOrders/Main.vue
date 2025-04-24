@@ -2,6 +2,10 @@
 import { ref } from "vue";
 import Popup from "@/components/Popup.vue";
 import Tooltip from "@/components/Tooltip.vue";
+import {useManualOrders} from "@/stores/manualOrders";
+
+const manualOrdersStore = useManualOrders()
+
 
 const activeSection = ref("orders");
 const showSidebar = ref(false);
@@ -91,6 +95,7 @@ const orders = ref([
       </div>
     </div>
 
+    {{ manualOrdersStore }}
     <div class="mt-4">
       <!-- !POSITIONS TABLE -->
       <div v-if="activeSection === 'positions'" class="">
