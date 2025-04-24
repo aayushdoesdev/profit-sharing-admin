@@ -85,7 +85,8 @@ const endpoints = ref({
   profile: '/admin/profile',
   notifications: '/admin/notifications',
   users: '/admin/users',
-  manualOrders: '/admin/manual/orders'
+  manualOrders: '/admin/manual/orders',
+  strategies: '/admin/strategies'
 })
 
 const getApiUrl = (endpoint) => {
