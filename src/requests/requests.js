@@ -76,7 +76,7 @@ if(config.env=="production"){
 
 
 const endpoints = ref({
-  login: '/auth/login/email',
+  login: '/admin/admins/login',
   logout: '/admin/logout',
   register: '/admin/user/signup',
   verifyOTP: '/auth/forgot-password',
@@ -152,8 +152,8 @@ const makeApiRequest = async (config,wait,endpoint,id) => {
         canMakeRequest.value = false;
 
         localStorage.setItem('token',"")
-        router.push({ name: 'login' });
-        endpoint !== "login"?window.location.reload():null
+        // router.push({ name: 'login' });
+        // endpoint !== "login"?window.location.reload():null
       }
 
     }else{
