@@ -62,7 +62,7 @@ const orders = ref([
 <template>
   <main class="bg-white py-4">
     <div
-      class="border-b border-black border-opacity-10 flex justify-between items-center"
+      class="border-b border-black border-opacity-10 flex justify-between items-center nrml-text"
     >
       <div class="flex items-center gap-8 px-4">
         <button
@@ -108,7 +108,7 @@ const orders = ref([
             <i class="pi pi-search opacity-50"></i>
             <input
               type="text"
-              class="bg-transparent py-2 outline-none"
+              class="bg-transparent py-1 outline-none"
               placeholder="Search for user"
             />
           </div>
@@ -197,19 +197,10 @@ const orders = ref([
             <i class="pi pi-search opacity-50"></i>
             <input
               type="text"
-              class="bg-transparent py-2 outline-none"
+              class="bg-transparent py-1 outline-none"
               placeholder="Search for user"
             />
           </div>
-
-          <button
-            v-if="activeSection === 'orders'"
-            @click="showSidebar = true"
-            class="btn flex items-center gap-2 nrml-text"
-          >
-            <i class="pi pi-plus"></i>
-            <p>Place Order</p>
-          </button>
         </div>
 
         <div class="mt-4 overflow-x-auto">
@@ -219,11 +210,15 @@ const orders = ref([
                 class="flex items-center justify-between w-full text-left px-4 py-2 text-[14px] font-bold tracking-wide bg-custom-grey text-custom-dark-grey"
               >
                 <th class="min-w-[50px] w-[5%] font-medium">S.NO</th>
-                <th class="min-w-[200px] w-[20%] font-medium">Strategy / Script</th>
+                <th class="min-w-[200px] w-[20%] font-medium">
+                  Strategy / Script
+                </th>
                 <th class="min-w-[200px] w-[20%] font-medium">Side / Price</th>
                 <th class="min-w-[200px] w-[20%] font-medium">Broker / ID</th>
                 <th class="min-w-[100px] w-[10%] font-medium">QTY</th>
-                <th class="min-w-[200px] text-right w-[10%] font-medium">Status</th>
+                <th class="min-w-[200px] text-right w-[10%] font-medium">
+                  Status
+                </th>
               </tr>
             </thead>
 
@@ -389,6 +384,107 @@ const orders = ref([
           </div>
         </transition>
       </div>
+
+      <!-- ! MASTER ORDERS -->
+      <div v-if="activeSection === 'master-orders'" class="">
+        <div class="flex items-center justify-between px-4">
+          <div
+            class="bg-custom-grey flex items-center gap-2 w-fit px-4 rounded-md nrml-text"
+          >
+            <i class="pi pi-search opacity-50"></i>
+            <input
+              type="text"
+              class="bg-transparent py-1 outline-none"
+              placeholder="Search for user"
+            />
+          </div>
+
+          <button
+            v-if="activeSection === 'master-orders'"
+            @click="showSidebar = true"
+            class="btn flex items-center gap-2 nrml-text"
+          >
+            <i class="pi pi-plus"></i>
+            <p>Place Order</p>
+          </button>
+        </div>
+        <div class="mt-4 overflow-x-auto">
+          <table class="w-full">
+            <thead>
+              <tr
+                class="flex items-center justify-between w-full text-left px-4 py-2 text-[14px] font-bold tracking-wide bg-custom-grey text-custom-dark-grey"
+              >
+                <th class="min-w-[50px] w-[5%] font-medium">S.NO</th>
+                <th class="min-w-[200px] w-[20%] font-medium">
+                  Strategy / Script
+                </th>
+                <th class="min-w-[200px] w-[20%] font-medium">Side / Price</th>
+                <th class="min-w-[200px] w-[20%] font-medium">Broker / ID</th>
+                <th class="min-w-[100px] w-[10%] font-medium">QTY</th>
+                <th class="min-w-[100px] w-[10%] font-medium">LTP</th>
+                <th class="min-w-[100px] w-[10%] font-medium">Trigger Price</th>
+                <th class="min-w-[100px] w-[10%] font-medium">Profit</th>
+                <th class="min-w-[100px] w-[10%] font-medium">Status</th>
+                <th class="min-w-[200px] text-right w-[10%] font-medium">
+                  Status
+                </th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <tr
+                v-for="(order, index) in orders"
+                :key="order.script"
+                class="flex items-center justify-between text-left w-full p-4 transition-all nrml-text tracking-wider border-b border-black border-opacity-10 font-medium"
+              >
+                <td class="min-w-[50px] w-[5%]">{{ index + 1 }}</td>
+                <td class="min-w-[200px] w-[20%]">
+                  <p>{{ order.strategy }}</p>
+                  <p>{{ order.script }}</p>
+                </td>
+                <td class="min-w-[200px] w-[20%]">
+                  <div class="flex items-center gap-2">
+                    <p
+                      :class="[
+                        'px-1 rounded font-bold',
+                        order.side.type === 'B'
+                          ? 'bg-green-100 text-green-600'
+                          : 'bg-red-100 text-red-600',
+                      ]"
+                    >
+                      {{ order.side.type }}
+                    </p>
+                    <p>
+                      {{ order.side.price }}
+                      <span class="text-[10px]"> {{ order.side.time }} </span>
+                    </p>
+                  </div>
+                </td>
+                <td class="min-w-[200px] w-[20%]">
+                  <p>{{ order.broker }}</p>
+                  <p>{{ order.brokerId }}</p>
+                </td>
+                <td class="min-w-[100px] w-[10%]">
+                  <p>{{ order.qty }}</p>
+                </td>
+                <td class="min-w-[200px] w-[10%] flex justify-end text-[12px]">
+                  <p
+                    :class="[
+                      'px-4 py-[2px] rounded w-fit',
+                      order.status === 'Successful'
+                        ? 'bg-green-100 text-green-600'
+                        : 'bg-yellow-100 text-yellow-700',
+                    ]"
+                  >
+                    {{ order.status }}
+                  </p>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
       <Popup :isOpen="isPopupOpen" @close="togglePopup(false)">
         <img src="/svg/sq-off-img.svg" alt="" class="w-[200px] mx-auto" />
 
