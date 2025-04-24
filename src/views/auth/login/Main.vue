@@ -1,6 +1,6 @@
 <script setup>
 import { ref, reactive } from "vue";
-import { RouterLink } from "vue-router";
+import { RouterLink, useRouter } from "vue-router";
 // import { useTickerStore } from "@/stores/matrix/ticker/ticker";
 import { required, email, minLength } from "@vuelidate/validators";
 import useVuelidate from "@vuelidate/core";
@@ -11,6 +11,7 @@ import {
   state,
 } from "@/requests/requests";
 
+const router = useRouter()
 
 const loginFormData = reactive({
   email: "",
@@ -52,8 +53,8 @@ const login = async () => {
     try {
       requested.value = true;
       const response = await makeRequest(
-        "login",
-        "POST",
+        'login',
+        'POST',
         loginFormData,
         {},
         {},
@@ -64,7 +65,8 @@ const login = async () => {
       if (response) {
         // currentStep.value = "setup";
         // setTokenAndRole(response.data.access_token, response.data.user_role);
-        localStorage.setItem("token", response.data.access_token);
+        localStorage.setItem("token", `Bearer ${response.token}`);
+        console.log(response.token)
         localStorage.setItem("role", response.data.user_role);
         // localStorage.setItem("matrix", "auto");
         localStorage.setItem("refresh", true);
@@ -77,8 +79,8 @@ const login = async () => {
         setisAuthenticated(true, response.data.user_role);
 
         // websocket connection
-        const tickerStore = useTickerStore();
-        tickerStore.startWebSocket(response.data.access_token);
+        // const tickerStore = useTickerStore();
+        // tickerStore.startWebSocket(response.data.access_token);
 
         // Navigate to dashboard 
         const redirectPage = localStorage.getItem('redirectAfterLogin');
@@ -86,19 +88,15 @@ const login = async () => {
         if(redirectPage){
           checkRedirectAfterLogin();
         } else{
-          router.push("/").then(() => {
-          nextTick(() => {
-            // location.reload();
-          });
-        });
+          router.push("/")
         }
         
-        toast.addToast('Success', 'Successfully logged in!', 'success', 3000);
+        // toast.addToast('Success', 'Successfully logged in!', 'success', 3000);
       } else {
-        errorMsg.value = state["login"].error.data.message;
+        errorMsg.value = state["login"].error?.message;
       }
     } catch (error) {
-      errorMsg.value = state["login"].error.data.message;
+      errorMsg.value = state["login"].error?.message;
       if (!errorMsg.value) {
         errorMsg.value = "An error occurred while logging in. Please try again later."
       }
