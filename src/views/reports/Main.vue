@@ -1,5 +1,6 @@
 <script setup>
 import { ref } from "vue";
+import Tooltip from "@/components/Tooltip.vue";
 
 const payouts = ref([
   {
@@ -92,8 +93,8 @@ const payouts = ref([
             <td class="min-w-[100px] text-right w-[10%]">{{ payout.ratio }}</td>
             <td class="min-w-[100px] text-right w-[10%]">₹{{ payout.userShare }}</td>
             <td class="min-w-[100px] text-right w-[10%]">₹{{ payout.adminShare }}</td>
-            <td class="min-w-[200px] flex justify-end w-[10%]">
-              <button class="pi pi-download text-[20px]"></button>
+            <td class="min-w-[200px] flex justify-end w-[10%] px-4">
+              <Tooltip text="Download"><button class="pi pi-download text-[20px]"></button></Tooltip>
             </td>
           </tr>
         </tbody>

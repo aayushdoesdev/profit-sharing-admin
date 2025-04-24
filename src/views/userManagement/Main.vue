@@ -2,6 +2,7 @@
 import { ref } from "vue";
 import { useRouter } from "vue-router";
 import Popup from "@/components/Popup.vue";
+import Tooltip from "@/components/Tooltip.vue";
 
 const router = useRouter();
 const showSidebar = ref(false);
@@ -63,10 +64,7 @@ const users = ref([
       </div>
 
       <div>
-        <button
-          @click="showSidebar = true"
-          class="flex items-center gap-2 btn"
-        >
+        <button @click="showSidebar = true" class="flex items-center gap-2 btn">
           <p>Add new user</p>
           <i class="pi pi-plus"></i>
         </button>
@@ -75,7 +73,7 @@ const users = ref([
 
     <!-- Table -->
     <div class="mt-4 overflow-x-auto">
-      <table class="w-full ">
+      <table class="w-full">
         <thead>
           <tr
             class="flex items-center justify-between w-full text-left px-4 py-3 text-[14px] font-bold tracking-wide bg-custom-grey text-custom-dark-grey whitespace-nowrap"
@@ -95,7 +93,9 @@ const users = ref([
             :key="user.id"
             class="flex items-center justify-between text-left w-full px-4 py-2 transition-all nrml-text tracking-wider border-b border-black border-opacity-10"
           >
-            <td class="min-w-[50px] w-[5%]">{{ String(index + 1).padStart(2, "0") }}</td>
+            <td class="min-w-[50px] w-[5%]">
+              {{ String(index + 1).padStart(2, "0") }}
+            </td>
             <td class="min-w-[200px] flex flex-col items-start w-[20%]">
               <p class="font-medium">{{ user.name }}</p>
               <p class="font-medium">{{ user.gst }}</p>
@@ -116,16 +116,29 @@ const users = ref([
                 {{ user.status }}
               </p>
             </td>
-            <td class="min-w-[100px] w-[15%] flex justify-end items-center gap-4">
-              <button
-                @click="router.push('/calender')"
-                class="pi pi-calendar text-[20px]"
-              ></button>
-              <button class="pi pi-pen-to-square text-custom-blue text-[20px]"></button>
-              <button
-                @click="toggleDeletePopup(true)"
-                class="pi pi-trash text-custom-red text-[20px]"
-              ></button>
+            <td
+              class="min-w-[100px] w-[15%] flex justify-end items-center gap-4"
+            >
+              <Tooltip text="Calender">
+                <button
+                  @click="router.push('/calender')"
+                  class="pi pi-calendar text-[20px]"
+                ></button>
+              </Tooltip>
+              <Tooltip text="Edit">
+                <button
+                  class="pi pi-pen-to-square text-custom-blue text-[20px]"
+                ></button>
+              </Tooltip>
+              <Tooltip text="View">
+                <button class="pi pi-eye text-[18px]"></button>
+              </Tooltip>
+              <Tooltip text="Delete">
+                <button
+                  @click="toggleDeletePopup(true)"
+                  class="pi pi-trash text-custom-red text-[20px]"
+                ></button>
+              </Tooltip>
             </td>
           </tr>
         </tbody>
@@ -272,7 +285,7 @@ const users = ref([
     </transition>
 
     <Popup :isOpen="isDeletePopup" @close="toggleDeletePopup(false)">
-      <img src="/svg/delete-img.svg" alt="" class="w-[350px] mx-auto">
+      <img src="/svg/delete-img.svg" alt="" class="w-[350px] mx-auto" />
 
       <div
         class="flex flex-col items-center justify-center text-center gap-4 w-full mt-4"

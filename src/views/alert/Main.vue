@@ -1,5 +1,6 @@
 <script setup>
 import { ref } from "vue";
+import Tooltip from "@/components/Tooltip.vue";
 
 const alerts = ref([
   {
@@ -73,7 +74,7 @@ const alerts = ref([
             <td class="min-w-[200px] w-[15%]">{{ alert.strategy }}</td>
             <td class="min-w-[200px] flex items-center gap-2 w-[20%]">
               <p>{{ alert.dataId }}</p>
-              <button class="pi pi-copy text-[20px]"></button>
+              <Tooltip text="copy"><button class="pi pi-copy text-[20px]"></button></Tooltip>
             </td>
             <td class="min-w-[150px] flex justify-end w-[10%]">{{ alert.createdAt }}</td>
           </tr>

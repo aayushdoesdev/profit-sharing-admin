@@ -66,6 +66,16 @@ const orders = ref([
     >
       <div class="flex items-center gap-8 px-4">
         <button
+          @click="toggleSections('master-orders')"
+          class="px-4 py-1"
+          :class="{
+            'border-b-2 border-custom-blue text-custom-blue font-semibold':
+              activeSection === 'master-orders',
+          }"
+        >
+          Master Orders
+        </button>
+        <button
           @click="toggleSections('orders')"
           class="px-4 py-1"
           :class="{
