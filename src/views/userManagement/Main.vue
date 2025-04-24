@@ -3,6 +3,12 @@ import { ref } from "vue";
 import { useRouter } from "vue-router";
 import Popup from "@/components/Popup.vue";
 import Tooltip from "@/components/Tooltip.vue";
+import { useJoinerStore } from "@/stores/joiners";
+import { storeToRefs } from "pinia";
+
+
+const joinerStore = useJoinerStore();
+const { joiners } = storeToRefs(joinerStore);
 
 const router = useRouter();
 const showSidebar = ref(false);
@@ -53,6 +59,7 @@ const users = ref([
 <template>
   <main class="bg-white py-4">
     <!-- Top bar -->
+     {{ joiners[0] }}
     <div class="flex items-center justify-between px-4 nrml-text">
       <div class="bg-custom-grey flex items-center gap-2 w-fit px-4 rounded-md">
         <i class="pi pi-search opacity-50"></i>
@@ -73,15 +80,17 @@ const users = ref([
 
     <!-- Table -->
     <div class="mt-4 overflow-x-auto">
+      
       <table class="w-full">
         <thead>
           <tr
             class="flex items-center justify-between w-full text-left px-4 py-3 text-[14px] font-bold tracking-wide bg-custom-grey text-custom-dark-grey whitespace-nowrap"
           >
             <th class="min-w-[50px] w-[5%] font-medium">S.NO</th>
-            <th class="min-w-[200px] w-[20%] font-medium">User Name</th>
-            <th class="min-w-[250px] w-[20%] font-medium">Profit Sharing</th>
+            <th class="min-w-[200px] w-[20%] font-medium">User Name / Referral ID</th>
             <th class="min-w-[100px] w-[10%] font-medium">Broker</th>
+            <th class="min-w-[250px] w-[20%] font-medium">Profit Sharing</th>
+            <th class="min-w-[100px] w-[10%] font-medium">Profit</th>
             <th class="min-w-[150px] w-[10%] font-medium">Status</th>
             <th class="min-w-[100px] text-right w-[15%] font-medium">Action</th>
           </tr>
@@ -89,7 +98,7 @@ const users = ref([
 
         <tbody>
           <tr
-            v-for="(user, index) in users"
+            v-for="(user, index) in joiners"
             :key="user.id"
             class="flex items-center justify-between text-left w-full px-4 py-2 transition-all nrml-text tracking-wider border-b border-black border-opacity-10"
           >
@@ -97,13 +106,15 @@ const users = ref([
               {{ String(index + 1).padStart(2, "0") }}
             </td>
             <td class="min-w-[200px] flex flex-col items-start w-[20%]">
-              <p class="font-medium">{{ user.name }}</p>
-              <p class="font-medium">{{ user.gst }}</p>
+              <p class="font-medium">{{ user.user_name }}</p>
+              <p class="font-medium">{{ user.referral_id ? user.referral_id : '- -' }}</p>
             </td>
+            
+            <td class="min-w-[100px] font-medium w-[10%]">{{ user.broker_name }}</td>
             <td class="min-w-[250px] flex flex-col gap-2 font-medium w-[20%]">
               <p>{{ user.profitSharing }}</p>
             </td>
-            <td class="min-w-[100px] font-medium w-[10%]">{{ user.broker }}</td>
+            <td class="min-w-[100px] font-medium w-[10%]">555</td>
             <td class="min-w-[150px] w-[10%]">
               <p
                 :class="[
