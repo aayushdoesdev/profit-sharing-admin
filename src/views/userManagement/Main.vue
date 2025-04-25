@@ -19,40 +19,38 @@ const toggleDeletePopup = (button) => {
   isDeletePopup.value = button;
 };
 
-// const users = ref([
-//   {
-//     id: 1,
-//     name: "Roshni Chandra",
-//     gst: "GST5849JD893KS9W2",
-//     profitSharing: "80:20 (80-user & 20-Admin)",
-//     broker: "Dhan",
-//     status: "Connected",
-//   },
-//   {
-//     id: 2,
-//     name: "Aakash Mehta",
-//     gst: "GST1245AA982KS8W2",
-//     profitSharing: "70:30 (80-user & 20-Admin)",
-//     broker: "Zerodha",
-//     status: "Disconnected",
-//   },
-//   {
-//     id: 3,
-//     name: "Neha Verma",
-//     gst: "GST7531BB764KS3L9",
-//     profitSharing: "85:15 (80-user & 20-Admin)",
-//     broker: "Upstox",
-//     status: "Connected",
-//   },
-//   {
-//     id: 4,
-//     name: "Rajat Kapoor",
-//     gst: "GST9923CC213KS6Z8",
-//     profitSharing: "75:25 (80-user & 20-Admin)",
-//     broker: "Fyers",
-//     status: "Disconnected",
-//   },
-// ]);
+// New form data structure matching the payload
+const userData = ref({
+  name: "",
+  email: "",
+  mobile: "",
+  dob: "",
+  pan_number: "",
+  is_disabled: false,
+  message: "",
+  password: ""
+});
+
+const brokerData = ref({
+  broker_userid: "",
+  broker_password: "",
+  broker_qr_key: "",
+  broker_api: "",
+  broker_api_secret: "",
+  broker_name: "",
+  token_status: "valid",
+  broker_token: "",
+  broker_token_date: "",
+  is_active: true,
+  is_autologin: false,
+  is_disabled: false,
+  is_editable: true,
+  message: ""
+});
+
+const addUser = async () => {
+  await userStore.addUser({user : userData.value , broker : brokerData.value})
+}
 </script>
 
 <template>
@@ -127,7 +125,7 @@ const toggleDeletePopup = (button) => {
               </p>
             </td>
             <td class="min-w-[100px] w-[10%]">
-              <template v-if="user.broker_status.toLowerCase() === 'connected'">
+              <template v-if="user.broker_status && user.broker_status.toLowerCase() === 'connected'">
                 <div
                   class="text-green-600 flex gap-1 items-center font-semibold"
                 >
@@ -138,7 +136,7 @@ const toggleDeletePopup = (button) => {
               <template v-else>
                 <button
                   class="text-blue-600 hover:text-blue-800 transition-colors flex gap-1"
-                  @click="handleConnect(broker.id)"
+                  @click="handleConnect(user.id)"
                 >
                   <i class="pi pi-link text-[18px]"></i>
                   <p>Connect</p>
@@ -178,7 +176,7 @@ const toggleDeletePopup = (button) => {
     <transition name="slide">
       <div
         v-if="showSidebar"
-        class="fixed right-0 top-0 h-full w-[400px] bg-white shadow-lg z-50 p-6"
+        class="fixed right-0 top-0 h-full w-[600px] bg-[#F3F2F7] shadow-lg z-50 p-6 overflow-y-auto"
       >
         <!-- Header -->
         <div class="flex justify-between items-center mb-4">
@@ -202,12 +200,12 @@ const toggleDeletePopup = (button) => {
         </div>
 
         <!-- Step Indicator -->
-        <div class="flex w-full max-w-md text-sm font-medium">
+        <div class="flex w-full text-sm font-medium gap-2">
           <!-- Step 1 -->
           <div
-            class="relative flex items-center px-4 py-3 rounded-l-md w-full"
+            class="relative flex items-center px-4 py-3 rounded-l-md w-full first-step"
             :class="
-              currentStep === 1
+              currentStep >= 1
                 ? 'bg-blue-100 text-custom-blue'
                 : 'bg-white text-gray-400 border'
             "
@@ -216,7 +214,7 @@ const toggleDeletePopup = (button) => {
               <div
                 :class="[
                   'w-6 h-6 flex items-center justify-center rounded-full text-xs',
-                  currentStep === 1
+                  currentStep >= 1
                     ? 'bg-custom-blue text-white'
                     : 'border border-gray-400 text-gray-400',
                 ]"
@@ -233,11 +231,11 @@ const toggleDeletePopup = (button) => {
 
           <!-- Step 2 -->
           <div
-            class="relative flex items-center px-4 py-3 rounded-r-md w-full"
+            class="relative flex items-center px-8 py-3 rounded-r-md w-full second-step"
             :class="
               currentStep === 2
                 ? 'bg-blue-100 text-custom-blue'
-                : 'bg-white text-gray-400 border border-l-0'
+                : 'bg-white text-gray-400 '
             "
           >
             <div class="flex items-center gap-2">
@@ -257,58 +255,132 @@ const toggleDeletePopup = (button) => {
         </div>
 
         <!-- Form -->
-        <div class="nrml-text space-y-4 mt-4">
+        <div class="nrml-text mt-4">
           <!-- Step 1: Add User Form -->
           <template v-if="currentStep === 1">
-            <div>
-              <label class="opacity-70">Username</label>
-              <input type="text" class="custom-input" />
-            </div>
-            <div>
-              <label class="opacity-70">Number</label>
-              <input type="text" class="custom-input" />
-            </div>
-            <div>
-              <label class="opacity-70">Email</label>
-              <input type="text" class="custom-input" />
-            </div>
-            <div>
-              <label class="opacity-70">PAN Number</label>
-              <input type="text" class="custom-input" />
-            </div>
-            <div>
-              <label class="opacity-70">DOB</label>
-              <input type="date" class="custom-input" />
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="opacity-70">Username</label>
+                <input type="text" v-model="userData.name" class="custom-input" />
+              </div>
+              <div>
+                <label class="opacity-70">Mobile</label>
+                <input type="text" v-model="userData.mobile" class="custom-input" />
+              </div>
+              <div>
+                <label class="opacity-70">Email</label>
+                <input type="email" v-model="userData.email" class="custom-input" />
+              </div>
+              <div>
+                <label class="opacity-70">Password</label>
+                <input type="password" v-model="userData.password" class="custom-input" />
+              </div>
+              <div>
+                <label class="opacity-70">PAN Number</label>
+                <input type="text" v-model="userData.pan_number" class="custom-input" />
+              </div>
+              <div>
+                <label class="opacity-70">DOB</label>
+                <input type="date" v-model="userData.dob" class="custom-input" />
+              </div>
+              <div class="flex flex-col">
+                <label class="opacity-70 mb-2">Disabled</label>
+                <label class="inline-flex items-center cursor-pointer">
+                  <input type="checkbox" v-model="userData.is_disabled" class="sr-only peer">
+                  <div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-custom-blue"></div>
+                </label>
+              </div>
+              <div>
+                <label class="opacity-70">Message</label>
+                <input type="text" v-model="userData.message" class="custom-input" />
+              </div>
             </div>
           </template>
 
           <!-- Step 2: Add Broker Form -->
           <template v-else>
-            <div>
-              <label class="opacity-70">Select Broker</label>
-              <input type="text" class="custom-input" />
-            </div>
-            <div>
-              <label class="opacity-70">Broker User ID</label>
-              <input type="text" class="custom-input" />
-            </div>
-            <div>
-              <label class="opacity-70">Broker Password</label>
-              <input type="text" class="custom-input" />
-            </div>
-            <div>
-              <label class="opacity-70">Broker QR Key</label>
-              <input type="password" class="custom-input" />
-            </div>
-            <div>
-              <label class="opacity-70">Broker API</label>
-              <input type="text" class="custom-input" />
-            </div>
-            <div>
-              <label class="opacity-70">Broker API Secret</label>
-              <input type="text" class="custom-input" />
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="opacity-70">Broker Name</label>
+                <input type="text" v-model="brokerData.broker_name" class="custom-input" />
+              </div>
+              <div>
+                <label class="opacity-70">Broker User ID</label>
+                <input type="text" v-model="brokerData.broker_userid" class="custom-input" />
+              </div>
+              <div>
+                <label class="opacity-70">Broker Password</label>
+                <input type="password" v-model="brokerData.broker_password" class="custom-input" />
+              </div>
+              <div>
+                <label class="opacity-70">Broker QR Key</label>
+                <input type="password" v-model="brokerData.broker_qr_key" class="custom-input" />
+              </div>
+              <div>
+                <label class="opacity-70">Broker API</label>
+                <input type="text" v-model="brokerData.broker_api" class="custom-input" />
+              </div>
+              <div>
+                <label class="opacity-70">Broker API Secret</label>
+                <input type="password" v-model="brokerData.broker_api_secret" class="custom-input" />
+              </div>
+              <div>
+                <label class="opacity-70">Broker Token</label>
+                <input type="text" v-model="brokerData.broker_token" class="custom-input" />
+              </div>
+              <div>
+                <label class="opacity-70">Token Status</label>
+                <input type="text" v-model="brokerData.token_status" class="custom-input" />
+              </div>
+              <div>
+                <label class="opacity-70">Token Date</label>
+                <input type="date" v-model="brokerData.broker_token_date" class="custom-input" />
+              </div>
+              <div>
+                <label class="opacity-70">Message</label>
+                <input type="text" v-model="brokerData.message" class="custom-input" />
+              </div>
+              
+              <!-- Toggle switches section -->
+              <div class="col-span-2 grid grid-cols-2 gap-4 mt-2">
+                <div class="flex flex-col">
+                  <label class="opacity-70 mb-2">Active</label>
+                  <label class="inline-flex items-center cursor-pointer">
+                    <input type="checkbox" v-model="brokerData.is_active" class="sr-only peer">
+                    <div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-custom-blue"></div>
+                  </label>
+                </div>
+                <div class="flex flex-col">
+                  <label class="opacity-70 mb-2">Auto Login</label>
+                  <label class="inline-flex items-center cursor-pointer">
+                    <input type="checkbox" v-model="brokerData.is_autologin" class="sr-only peer">
+                    <div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-custom-blue"></div>
+                  </label>
+                </div>
+                <div class="flex flex-col">
+                  <label class="opacity-70 mb-2">Disabled</label>
+                  <label class="inline-flex items-center cursor-pointer">
+                    <input type="checkbox" v-model="brokerData.is_disabled" class="sr-only peer">
+                    <div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-custom-blue"></div>
+                  </label>
+                </div>
+                <div class="flex flex-col">
+                  <label class="opacity-70 mb-2">Editable</label>
+                  <label class="inline-flex items-center cursor-pointer">
+                    <input type="checkbox" v-model="brokerData.is_editable" class="sr-only peer">
+                    <div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-custom-blue"></div>
+                  </label>
+                </div>
+              </div>
             </div>
           </template>
+        </div>
+        
+        <!-- Submit Button -->
+        <div class="mt-6">
+          <button @click="addUser" class="w-full bg-custom-blue text-white py-2 rounded-md font-medium">
+            {{ currentStep === 1 ? "Save User" : "Save Broker" }}
+          </button>
         </div>
       </div>
     </transition>
@@ -361,5 +433,17 @@ const toggleDeletePopup = (button) => {
 .slide-enter-active,
 .slide-leave-active {
   transition: transform 0.3s ease;
+}
+
+.first-step{
+  clip-path: polygon(90% 0%, 100% 50%, 90% 100%, 0% 100%, 0 52%, 0% 0%);
+}
+
+.second-step{
+  clip-path: polygon(100% 0, 100% 50%, 100% 100%, 0% 100%, 10% 50%, 0% 0%);
+}
+
+.custom-input {
+  @apply w-full px-3 py-2 bg-white rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent;
 }
 </style>

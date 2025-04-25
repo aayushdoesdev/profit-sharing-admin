@@ -19,9 +19,17 @@ export const useUserStore = defineStore('users', () => {
         }
     }
 
+    const addUser = async (form) => {
+        try {
+             const response = await makeRequest(endpoint , 'POST' , form);
+        } catch (error) {
+            console.log('error in addUser', error)
+        }
+    }
     getUsers();
     return {
         users,
+        addUser,
         getUsers
     }
 
