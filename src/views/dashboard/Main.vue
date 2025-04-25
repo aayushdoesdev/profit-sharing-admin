@@ -66,7 +66,7 @@ const positions = ref([
 
 <template>
   <main class="font-geist">
-    <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 px-4 py-2 gap-2">
+    <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 px-4 py-2 gap-2">
       <div class="bg-white p-4 space-y-4 rounded-md">
         <div class="flex items-center justify-between">
           <p class="nrml-text">Overall Profit</p>
@@ -133,7 +133,7 @@ const positions = ref([
         </div>
       </div>
 
-      <div class="bg-white p-4 space-y-4 rounded-md col-span-2 md:col-span-1">
+      <!-- <div class="bg-white p-4 space-y-4 rounded-md col-span-2 md:col-span-1">
         <div class="flex items-center justify-between">
           <p class="nrml-text">Brokers</p>
           <img src="/svg/dash5.svg" class="h-[30px] w-[30px]"></img>
@@ -145,7 +145,7 @@ const positions = ref([
             <p>+ Connect</p>
           </button>
         </div>
-      </div>
+      </div> -->
     </div>
 
     <!-- POSITIONS TABLE -->

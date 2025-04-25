@@ -1,96 +1,38 @@
 <script setup>
 import Tooltip from "@/components/Tooltip.vue";
+import { useBrokerStore } from "@/stores/brokers";
+import { storeToRefs } from "pinia";
 
-const payouts = [
-  {
-    broker: "Alice",
-    user: "sameer",
-    tokenDate: "2025-03-07 14:49:16",
-    disable: false,
-    active: true,
-    connect: "Connect",
-  },
-  {
-    broker: "Angel",
-    user: "Vishwas Tripathi",
-    tokenDate: "2025-04-23 10:20:35",
-    disable: false,
-    active: false,
-    connect: "Connected",
-  },
-  {
-    broker: "Alice",
-    user: "Krishnakumari R",
-    tokenDate: "2025-03-03 12:13:47",
-    disable: true,
-    active: true,
-    connect: "Connect",
-  },
-  {
-    broker: "Angel",
-    user: "Shiva sankar",
-    tokenDate: "2025-04-21 09:41:36",
-    disable: false,
-    active: false,
-    connect: "Connect",
-  },
-  {
-    broker: "Zerodha",
-    user: "Shiva sankar",
-    tokenDate: "2000-01-01 00:00:00",
-    disable: false,
-    active: false,
-    connect: "Connect",
-  },
-  {
-    broker: "Dhan",
-    user: "Vicky Rameshcha",
-    tokenDate: "2025-03-05 10:04:34",
-    disable: true,
-    active: false,
-    connect: "Connect",
-  },
-  {
-    broker: "Angel",
-    user: "Khushi gupta",
-    tokenDate: "2025-03-06 09:30:06",
-    disable: false,
-    active: false,
-    connect: "Connect",
-  },
-  {
-    broker: "Angel",
-    user: "Aleem shaikh",
-    tokenDate: "2025-02-01 08:21:54",
-    disable: false,
-    active: false,
-    connect: "Connect",
-  },
-  {
-    broker: "Angel",
-    user: "Ganesh bahadur Chhetri",
-    tokenDate: "2025-03-21 14:19:56",
-    disable: false,
-    active: false,
-    connect: "Connect",
-  },
-  {
-    broker: "Angel",
-    user: "sandeep reddy",
-    tokenDate: "2025-04-23 10:33:49",
-    disable: false,
-    active: false,
-    connect: "Connect",
-  },
-  {
-    broker: "Dhan",
-    user: "Samyak Gaikwad",
-    tokenDate: "2025-04-23 10:03:31",
-    disable: false,
-    active: false,
-    connect: "Connected",
-  },
-];
+const brokerStore = useBrokerStore();
+const { brokers } = storeToRefs(brokerStore);
+
+function formatDateTime(isoString) {
+  const date = new Date(isoString);
+
+  const hours = date.getUTCHours();
+  const minutes = date.getUTCMinutes();
+  const ampm = hours >= 12 ? 'PM' : 'AM';
+
+  const formattedHours = ((hours + 11) % 12 + 1).toString().padStart(2, '0');
+  const formattedMinutes = minutes.toString().padStart(2, '0');
+
+  const day = date.getUTCDate();
+  const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const month = monthNames[date.getUTCMonth()];
+  const year = date.getUTCFullYear();
+
+  return `${formattedHours}:${formattedMinutes}${ampm}/${day.toString().padStart(2, '0')} ${month} ${year}`;
+}
+
+const isTokenValid = (date) => {
+  const currentDate = new Date();
+  const tokenDate = new Date(date);
+  return tokenDate === currentDate;
+}
+
+const handleConnect = async (brokerId) => {
+  const res = await brokerStore.connectBroker(brokerId);
+}
 </script>
 
 <template>
@@ -107,21 +49,20 @@ const payouts = [
         />
       </div>
     </div>
-
-    <div class="mt-2 overflow-auto">
+    <div class="mt-2 overflow-auto h-[80vh]">
       <table class="w-full">
         <thead>
           <tr
             class="flex items-center justify-between w-full text-left px-4 py-2 text-[14px] font-bold tracking-wide bg-custom-grey text-custom-dark-grey"
           >
-            <th class="min-w-[100px] w-[10%] font-medium">Broker ID</th>
+            <th class="min-w-[150px] w-[10%] font-medium">Broker ID</th>
             <th class="min-w-[150px] w-[10%] font-medium">Broker</th>
-            <th class="min-w-[200px] w-[15%] font-medium">User</th>
-            <th class="min-w-[100px] w-[15%] font-medium">Token Date</th>
-            <th class="min-w-[100px] text-right w-[10%] font-medium">
+            <th class="min-w-[100px] w-[10%] font-medium">User</th>
+            <th class="min-w-[150px] w-[15%]  font-medium">Token Date</th>
+            <th class="min-w-[50px] text-center  w-[5%] font-medium">
               Disable
             </th>
-            <th class="min-w-[100px] text-right w-[10%] font-medium">Active</th>
+            <th class="min-w-[50px] text-center w-[5%] font-medium">Active</th>
             <th class="min-w-[100px] text-right w-[10%] font-medium">
               Connect
             </th>
@@ -131,15 +72,16 @@ const payouts = [
 
         <tbody>
           <tr
-            v-for="(payout, index) in payouts"
+            v-for="(broker, index) in brokers"
             :key="index"
             class="flex items-center justify-between text-left w-full px-4 py-3 transition-all tracking-wider border-b border-black border-opacity-10 font-medium nrml-text"
           >
-            <td class="min-w-[100px] w-[10%]">{{ index + 1 }}</td>
-            <td class="min-w-[150px] w-[10%]">{{ payout.broker }}</td>
-            <td class="min-w-[200px] w-[15%]">{{ payout.user }}</td>
-            <td class="min-w-[100px] w-[15%]">{{ payout.tokenDate }}</td>
-            <td class="min-w-[100px] text-right w-[10%]">
+            
+            <td class="min-w-[150px] w-[10%]">{{ broker.broker_userid }}</td>
+            <td class="min-w-[150px] w-[10%]">{{ broker.broker_name }}</td>
+            <td class="min-w-[100px] w-[10%]">{{ broker.user_name }}</td>
+            <td class="min-w-[150px] w-[15%] ">{{ formatDateTime(broker.broker_token_date) }}</td>
+            <td class="min-w-[50px] text-center w-[5%]">
               <label class="relative inline-flex items-center cursor-pointer">
                 <input type="checkbox" class="sr-only peer" />
                 <div
@@ -150,7 +92,7 @@ const payouts = [
                 ></div>
               </label>
             </td>
-            <td class="min-w-[100px] text-right w-[10%]">
+            <td class="min-w-[50px] text-center w-[5%]">
               <label class="relative inline-flex items-center cursor-pointer">
                 <input type="checkbox" class="sr-only peer" />
                 <div
@@ -162,7 +104,7 @@ const payouts = [
               </label>
             </td>
             <td class="min-w-[100px] text-right w-[10%] flex justify-end">
-              <template v-if="payout.connect === 'Connected'">
+              <template v-if="isTokenValid(broker.broker_token_date)">
                 <div
                   class="text-green-600 flex gap-1 items-center font-semibold"
                 >
@@ -173,7 +115,7 @@ const payouts = [
               <template v-else>
                 <button
                   class="text-blue-600 hover:text-blue-800 transition-colors flex gap-1"
-                  @click="handleConnect(payout)"
+                  @click="handleConnect(broker.id)"
                 >
                   <i class="pi pi-link text-[18px]"></i>
                   <p>Connect</p>
