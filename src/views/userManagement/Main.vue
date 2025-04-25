@@ -59,7 +59,6 @@ const users = ref([
 <template>
   <main class="bg-white py-4">
     <!-- Top bar -->
-     {{ joiners[0] }}
     <div class="flex items-center justify-between px-4 nrml-text">
       <div class="bg-custom-grey flex items-center gap-2 w-fit px-4 rounded-md">
         <i class="pi pi-search opacity-50"></i>
@@ -79,7 +78,7 @@ const users = ref([
     </div>
 
     <!-- Table -->
-    <div class="mt-4 overflow-x-auto">
+    <div class="mt-4 overflow-x-auto h-[80vh]">
       
       <table class="w-full">
         <thead>
@@ -92,6 +91,7 @@ const users = ref([
             <th class="min-w-[250px] w-[20%] font-medium">Profit Sharing</th>
             <th class="min-w-[100px] w-[10%] font-medium">Profit</th>
             <th class="min-w-[150px] w-[10%] font-medium">Status</th>
+            <th class="min-w-[100px] w-[10%] font-medium">Connect</th>
             <th class="min-w-[100px] text-right w-[15%] font-medium">Action</th>
           </tr>
         </thead>
@@ -126,6 +126,25 @@ const users = ref([
               >
                 {{ user.status }}
               </p>
+            </td>
+            <td class="min-w-[100px] w-[10%]">
+              <template v-if="false">
+                <div
+                  class="text-green-600 flex gap-1 items-center font-semibold"
+                >
+                  <i class="pi pi-check-circle"></i>
+                  <p>Connected</p>
+                </div>
+              </template>
+              <template v-else>
+                <button
+                  class="text-blue-600 hover:text-blue-800 transition-colors flex gap-1"
+                  @click="handleConnect(broker.id)"
+                >
+                  <i class="pi pi-link text-[18px]"></i>
+                  <p>Connect</p>
+                </button>
+              </template>
             </td>
             <td
               class="min-w-[100px] w-[15%] flex justify-end items-center gap-4"
