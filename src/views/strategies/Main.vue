@@ -11,6 +11,7 @@ const { strategies } = storeToRefs(strategiesStore);
 const showSidebar = ref(false);
 const isEditMode = ref(false);
 const editingStrategyId = ref(null);
+const deletingStrategyId = ref(null);
 
 const isDeletePopupOpen = ref(false);
 const isSqoffPopupOpen = ref(false);
@@ -118,10 +119,22 @@ const editStrategy = async () => {
     console.error("Edit failed", error);
   }
 };
+
+const deleteStrategy = async (strategy) => {
+  if (!strategy) return;
+
+  deletingStrategyId.value = strategy.id;
+
+  try {
+    await strategiesStore.deleteStrategy(deletingStrategyId.value);
+  } catch (error) {
+    console.error("Deleting failed", error);
+  }
+};
 </script>
 
 <template>
-  <main class="bg-white py-2">
+  <main class="bg-white py-2 overflow-y-auto">
     <div class="flex items-center justify-between px-4 nrml-text">
       <div class="bg-custom-grey flex items-center gap-2 w-fit px-4 rounded-md">
         <i class="pi pi-search opacity-50"></i>
@@ -140,7 +153,7 @@ const editStrategy = async () => {
       </div>
     </div>
 
-    <div class="mt-4 overflow-auto">
+    <div class="mt-4 h-[calc(100vh-100px)] overflow-y-auto">
       <table class="w-full">
         <thead>
           <tr
@@ -152,7 +165,7 @@ const editStrategy = async () => {
             <th class="min-w-[120px] w-[10%] font-medium">Expiry</th>
             <th class="min-w-[100px] w-[10%] font-medium">Entry / Exit</th>
             <th class="min-w-[100px] w-[10%] font-medium">LTP</th>
-            <th class="min-w-[120px] w-[10%] font-medium">Status</th>
+            <th class="min-w-[120px] w-[10%] font-medium">Position Status</th>
             <th class="min-w-[100px] w-[10%] font-medium">Active</th>
             <th class="min-w-[100px] text-right w-[10%] font-medium">Action</th>
           </tr>
@@ -195,7 +208,10 @@ const editStrategy = async () => {
             </td>
             <td class="min-w-[100px] flex w-[10%] gap-4">
               <Tooltip text="Edit">
-                <button class="pi pi-pencil text-[18px]" @click="openEditSidebar(strategy)"></button>
+                <button
+                  class="pi pi-pencil text-[18px]"
+                  @click="openEditSidebar(strategy)"
+                ></button>
               </Tooltip>
 
               <Tooltip text="Joiner">
@@ -207,7 +223,10 @@ const editStrategy = async () => {
               </Tooltip>
 
               <Tooltip text="Delete">
-                <button class="pi pi-trash text-[18px]"></button>
+                <button
+                  class="pi pi-trash text-[18px]"
+                  @click="deleteStrategy(strategy)"
+                ></button>
               </Tooltip>
             </td>
           </tr>
@@ -233,7 +252,7 @@ const editStrategy = async () => {
                 @click="isEditMode ? editStrategy() : createStrategy()"
                 class="text-[16px] bg-custom-blue text-white font-semibold px-4 py-1 rounded"
               >
-              {{ isEditMode ? "Update" : "Create" }}
+                {{ isEditMode ? "Update" : "Create" }}
               </button>
             </div>
           </div>

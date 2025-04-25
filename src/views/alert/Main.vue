@@ -1,37 +1,20 @@
 <script setup>
 import { ref } from "vue";
 import Tooltip from "@/components/Tooltip.vue";
+import { useAlertsStore } from "@/stores/alerts";
+import { storeToRefs } from "pinia";
 
-const alerts = ref([
-  {
-    id: 1,
-    alertId: "GT38932JSY82JKS",
-    strategy: "Best from the rest",
-    dataId: "DEH9384F3293JF",
-    createdAt: "24 Mar 2025",
-  },
-  {
-    id: 2,
-    alertId: "ALR92384KSJDFK2",
-    strategy: "Intraday Master",
-    dataId: "KD84KDJF83838DK",
-    createdAt: "25 Mar 2025",
-  },
-  {
-    id: 3,
-    alertId: "RTY3829DJDK38DK",
-    strategy: "Gap Up Breakout",
-    dataId: "HF74DJ29DKDI33F",
-    createdAt: "26 Mar 2025",
-  },
-  {
-    id: 4,
-    alertId: "JDKD8823DJDK293",
-    strategy: "Options Momentum",
-    dataId: "KDJF3838DJDK394",
-    createdAt: "27 Mar 2025",
-  },
-]);
+const alertStore = useAlertsStore()
+
+const {alerts} = storeToRefs(alertStore)
+
+function formatDate(inputDate) {
+  const date = new Date(inputDate);
+  return date.toLocaleString("en-US", {
+    month: "short",
+    year: "numeric",
+  });
+}
 </script>
 
 <template>
@@ -48,8 +31,7 @@ const alerts = ref([
         />
       </div>
     </div>
-
-    <div class="mt-4 overflow-x-auto">
+    <div class="mt-4 overflow-x-auto h-[calc(100vh-100px)]">
       <table class="w-full">
         <thead>
           <tr
@@ -70,13 +52,13 @@ const alerts = ref([
             class="flex items-center justify-between text-left w-full p-4 transition-all nrml-text tracking-wider border-b border-black border-opacity-10 font-medium"
           >
             <td class="min-w-[50px] w-[5%]">{{ index + 1 }}</td>
-            <td class="min-w-[200px] w-[15%]">{{ alert.alertId }}</td>
-            <td class="min-w-[200px] w-[15%]">{{ alert.strategy }}</td>
+            <td class="min-w-[200px] w-[15%]">{{ alert.data }}</td>
+            <td class="min-w-[200px] w-[15%]">{{ alert.strategy_name }}</td>
             <td class="min-w-[200px] flex items-center gap-2 w-[20%]">
-              <p>{{ alert.dataId }}</p>
+              <p>{{ alert.data }}</p>
               <Tooltip text="copy"><button class="pi pi-copy text-[20px]"></button></Tooltip>
             </td>
-            <td class="min-w-[150px] flex justify-end w-[10%]">{{ alert.createdAt }}</td>
+            <td class="min-w-[150px] flex justify-end w-[10%]">{{ formatDate(alert.created_at) }}</td>
           </tr>
         </tbody>
       </table>
