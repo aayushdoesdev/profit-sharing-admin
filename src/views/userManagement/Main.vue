@@ -3,12 +3,11 @@ import { ref } from "vue";
 import { useRouter } from "vue-router";
 import Popup from "@/components/Popup.vue";
 import Tooltip from "@/components/Tooltip.vue";
-import { useJoinerStore } from "@/stores/joiners";
+import { useUserStore } from "@/stores/users";
 import { storeToRefs } from "pinia";
 
-
-const joinerStore = useJoinerStore();
-const { joiners } = storeToRefs(joinerStore);
+const userStore = useUserStore();
+const { users } = storeToRefs(userStore);
 
 const router = useRouter();
 const showSidebar = ref(false);
@@ -20,40 +19,40 @@ const toggleDeletePopup = (button) => {
   isDeletePopup.value = button;
 };
 
-const users = ref([
-  {
-    id: 1,
-    name: "Roshni Chandra",
-    gst: "GST5849JD893KS9W2",
-    profitSharing: "80:20 (80-user & 20-Admin)",
-    broker: "Dhan",
-    status: "Connected",
-  },
-  {
-    id: 2,
-    name: "Aakash Mehta",
-    gst: "GST1245AA982KS8W2",
-    profitSharing: "70:30 (80-user & 20-Admin)",
-    broker: "Zerodha",
-    status: "Disconnected",
-  },
-  {
-    id: 3,
-    name: "Neha Verma",
-    gst: "GST7531BB764KS3L9",
-    profitSharing: "85:15 (80-user & 20-Admin)",
-    broker: "Upstox",
-    status: "Connected",
-  },
-  {
-    id: 4,
-    name: "Rajat Kapoor",
-    gst: "GST9923CC213KS6Z8",
-    profitSharing: "75:25 (80-user & 20-Admin)",
-    broker: "Fyers",
-    status: "Disconnected",
-  },
-]);
+// const users = ref([
+//   {
+//     id: 1,
+//     name: "Roshni Chandra",
+//     gst: "GST5849JD893KS9W2",
+//     profitSharing: "80:20 (80-user & 20-Admin)",
+//     broker: "Dhan",
+//     status: "Connected",
+//   },
+//   {
+//     id: 2,
+//     name: "Aakash Mehta",
+//     gst: "GST1245AA982KS8W2",
+//     profitSharing: "70:30 (80-user & 20-Admin)",
+//     broker: "Zerodha",
+//     status: "Disconnected",
+//   },
+//   {
+//     id: 3,
+//     name: "Neha Verma",
+//     gst: "GST7531BB764KS3L9",
+//     profitSharing: "85:15 (80-user & 20-Admin)",
+//     broker: "Upstox",
+//     status: "Connected",
+//   },
+//   {
+//     id: 4,
+//     name: "Rajat Kapoor",
+//     gst: "GST9923CC213KS6Z8",
+//     profitSharing: "75:25 (80-user & 20-Admin)",
+//     broker: "Fyers",
+//     status: "Disconnected",
+//   },
+// ]);
 </script>
 
 <template>
@@ -98,7 +97,7 @@ const users = ref([
 
         <tbody>
           <tr
-            v-for="(user, index) in joiners"
+            v-for="(user, index) in users"
             :key="user.id"
             class="flex items-center justify-between text-left w-full px-4 py-2 transition-all nrml-text tracking-wider border-b border-black border-opacity-10"
           >
@@ -106,29 +105,29 @@ const users = ref([
               {{ String(index + 1).padStart(2, "0") }}
             </td>
             <td class="min-w-[200px] flex flex-col items-start w-[20%]">
-              <p class="font-medium">{{ user.user_name }}</p>
-              <p class="font-medium">{{ user.referral_id ? user.referral_id : '- -' }}</p>
+              <p class="font-medium">{{ user.name }}</p>
+              <p class="font-medium">{{ user.refere_by ? user.refere_by : '- -' }}</p>
             </td>
             
             <td class="min-w-[100px] font-medium w-[10%]">{{ user.broker_name }}</td>
             <td class="min-w-[250px] flex flex-col gap-2 font-medium w-[20%]">
-              <p>{{ user.profitSharing }}</p>
+              <p>{{ user.admin_share_ration }}</p>
             </td>
             <td class="min-w-[100px] font-medium w-[10%]">555</td>
             <td class="min-w-[150px] w-[10%]">
               <p
                 :class="[
-                  'font-semibold px-2 py-[2px] rounded w-fit',
-                  user.status === 'Connected'
+                  'font-semibold px-2 py-[2px] rounded w-fit capitalize',
+                  user.is_disabled
                     ? 'bg-green-100 text-custom-green'
                     : 'bg-[#1C1D221F] text-custom-dark-grey',
                 ]"
               >
-                {{ user.status }}
+                {{ user.is_disabled }}
               </p>
             </td>
             <td class="min-w-[100px] w-[10%]">
-              <template v-if="false">
+              <template v-if="user.broker_status.toLowerCase() === 'connected'">
                 <div
                   class="text-green-600 flex gap-1 items-center font-semibold"
                 >

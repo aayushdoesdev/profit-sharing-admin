@@ -90,7 +90,7 @@ const endpoints = ref({
   joiners : '/admin/joiners',
   positions : '/admin/positions',
   alerts: '/admin/alerts',
-  brokers : '/admin/brokers'
+  brokers : '/admin/brokers',
 })
 
 const getApiUrl = (endpoint) => {
