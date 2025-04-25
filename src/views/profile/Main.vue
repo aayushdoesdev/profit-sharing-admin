@@ -1,4 +1,11 @@
-<script setup></script>
+<script setup>
+import { useProfileStore } from '@/stores/profile';
+import { storeToRefs } from 'pinia';
+
+const profileStore = useProfileStore()
+
+const {profile} = storeToRefs(profileStore)
+</script>
 
 <template>
   <main
@@ -7,18 +14,18 @@
     <div class="p-4 flex flex-col items-center w-full md:w-[20%] space-y-4">
       <div class="text-center">
         <div class="w-[100px] h-[100px] bg-slate-500 rounded-full"></div>
-        <p>Esther Howard</p>
-        <p>Trader</p>
+        <p class="capitalize">{{ profile?.name }}</p>
+        <p>Admin</p>
       </div>
 
       <div class="flex flex-col items-center nrml-text space-y-2">
         <div class="flex items-center gap-2">
           <i class="pi pi-phone"></i>
-          <p>+91 87678 87678</p>
+          <p>{{ profile?.mobile_prefix }} {{ profile?.mobile }}</p>
         </div>
         <div class="flex items-center gap-2">
           <i class="pi pi-envelope"></i>
-          <p>riyu768@gmail.com</p>
+          <p>{{ profile?.email }}</p>
         </div>
         <div class="flex items-center gap-2">
           <i class="pi pi-map-marker"></i>
