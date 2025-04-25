@@ -89,6 +89,7 @@ const endpoints = ref({
   strategies: '/admin/strategies',
   joiners : '/admin/joiners',
   positions : '/admin/positions',
+  alerts: '/admin/alerts',
   brokers : '/admin/brokers'
 })
 
