@@ -7,6 +7,7 @@ export const useBrokerStore = defineStore('brokers', () => {
 
     const endpoint = "brokers";
     const brokers = ref([]);
+    const idToEdit = ref(null);
 
     const getBrokers = async () => {
         try {
@@ -30,10 +31,52 @@ export const useBrokerStore = defineStore('brokers', () => {
         }
     }
 
+    const addEdit = async (form) => {
+        try {
+            if(idToEdit.value)
+            {
+                const response = await makeRequest(endpoint , "PUT" , form , {} , {} , 0 , idToEdit.value);
+                if (response.data) {
+                    return response.data;
+                }
+            }
+            else{
+                const response = await makeRequest(endpoint , "POST" , form);
+                if (response.data) {
+                    return response.data;
+                }
+            }
+        } catch (error) {
+            console.log('Error in addEdit', error)
+        }finally{
+            idToEdit.value = null;
+        }
+    }
+
+    const getBrokerByUserId = async (userId) => {
+        console.log('userId', userId)
+        try {
+            const response = await makeRequest(endpoint , 'GET' , {} , {} , {} , 0 , userId , 'user');
+    
+            if(response.data)
+            {
+                return response.data[0];
+            }
+            else {
+                return null;
+            }
+        } catch (error) {
+            console.log('Error in getBrokerByUserId', error)
+        }
+    }
+
     getBrokers();
     return {
         brokers,
+        idToEdit,
         connectBroker,
+        getBrokerByUserId,
+        addEdit,
         getBrokers
     }
 

@@ -7,6 +7,7 @@ export const useUserStore = defineStore('users', () => {
 
     const endpoint = "users";
     const users = ref([]);
+    const idtoEdit = ref(null);
 
     const getUsers = async () => {
         try {
@@ -19,17 +20,31 @@ export const useUserStore = defineStore('users', () => {
         }
     }
 
-    const addUser = async (form) => {
+    const addEditUser = async (form) => {
         try {
-             const response = await makeRequest(endpoint , 'POST' , form);
+            if (idtoEdit.value) {
+                const response = await makeRequest(endpoint, "PUT", form, {}, {}, 0, idtoEdit.value);
+                if (response.data) {
+                    return response.data;
+                }
+            } else {
+                const response = await makeRequest(endpoint, "POST", form);
+                if (response.data) {
+                    return response.data;
+                }
+            }
         } catch (error) {
-            console.log('error in addUser', error)
+            console.log('Error in addEditUser', error)
+        } finally {
+            idtoEdit.value = null;
         }
+       
     }
     getUsers();
     return {
+        idtoEdit,
         users,
-        addUser,
+        addEditUser,
         getUsers
     }
 

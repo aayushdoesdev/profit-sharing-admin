@@ -4,7 +4,7 @@ import { useBrokerStore } from "@/stores/brokers";
 import { storeToRefs } from "pinia";
 
 const brokerStore = useBrokerStore();
-const { brokers } = storeToRefs(brokerStore);
+const { brokers , idToEdit } = storeToRefs(brokerStore);
 
 function formatDateTime(isoString) {
   const date = new Date(isoString);
@@ -32,6 +32,17 @@ const isTokenValid = (date) => {
 
 const handleConnect = async (brokerId) => {
   const res = await brokerStore.connectBroker(brokerId);
+}
+
+const handleActive = async (brokerId , value) => {
+  idToEdit.value = brokerId;
+  const res = await brokerStore.addEdit({'is_active': value});
+  
+}
+const handleDisabled = async (brokerId , value) => {
+  idToEdit.value = brokerId;
+  const res = await brokerStore.addEdit({'is_active': value});
+  
 }
 </script>
 
@@ -83,7 +94,7 @@ const handleConnect = async (brokerId) => {
             <td class="min-w-[150px] w-[15%] ">{{ formatDateTime(broker.broker_token_date) }}</td>
             <td class="min-w-[50px] text-center w-[5%]">
               <label class="relative inline-flex items-center cursor-pointer">
-                <input type="checkbox" class="sr-only peer" />
+                <input @click="handleDisabled(broker.id , !broker.is_disabled)" v-model="broker.is_disabled" type="checkbox" class="sr-only peer" />
                 <div
                   class="w-10 h-5 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:bg-blue-500 transition-colors duration-300"
                 ></div>
@@ -94,7 +105,7 @@ const handleConnect = async (brokerId) => {
             </td>
             <td class="min-w-[50px] text-center w-[5%]">
               <label class="relative inline-flex items-center cursor-pointer">
-                <input type="checkbox" class="sr-only peer" />
+                <input @click="handleActive(broker.id , !broker.is_active)" v-model="broker.is_active" type="checkbox" class="sr-only peer" />
                 <div
                   class="w-10 h-5 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:bg-blue-500 transition-colors duration-300"
                 ></div>
