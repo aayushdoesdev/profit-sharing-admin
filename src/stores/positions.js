@@ -107,11 +107,45 @@ export const usePositionStore = defineStore("positions", () => {
     return result;
   });
 
+
+  //grouped strategy positions for dashboard
+  const groupedStrategies = computed(() => {
+    const map = new Map()
+  
+    positions.value.forEach(pos => {
+      const key = pos.strategy_id
+      if (!map.has(key)) {
+        map.set(key, {
+          strategy_id: pos.strategy_id,
+          strategy_name: pos.strategy_name,
+          side: pos.side,
+          status: 'CLOSED',
+          buy_price: 0,
+          sell_price: 0,
+          positions: []
+        })
+      }
+  
+      const group = map.get(key)
+      group.positions.push(pos)
+  
+      group.buy_price = parseFloat(pos.buy_price) || 0
+      group.sell_price = parseFloat(pos.sell_price) || 0
+  
+      if (pos.status === 'OPEN') {
+        group.status = 'OPEN'
+      }
+    })
+  
+    return Array.from(map.values())
+  })
+
   getPositions();
 
   return {
-    positions,
     getPositions,
+    positions,
+    groupedStrategies,
     groupedPositions,
     flatStrategySummary,
   };
