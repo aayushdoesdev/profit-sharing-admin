@@ -6,7 +6,7 @@ import { required, email, minLength } from "@vuelidate/validators";
 import useVuelidate from "@vuelidate/core";
 import {
   makeRequest,
-  // setTokenAndRole,
+  setToken,
   setisAuthenticated,
   state,
 } from "@/requests/requests";
@@ -65,9 +65,9 @@ const login = async () => {
       if (response) {
         // currentStep.value = "setup";
         // setTokenAndRole(response.data.access_token, response.data.user_role);
-        localStorage.setItem("token", `Bearer ${response.token}`);
-        console.log(response.token)
-        localStorage.setItem("role", response.data.user_role);
+        localStorage.setItem("token", `Bearer ${response.data.token}`);
+        // console.log(response.token)
+        localStorage.setItem("role", response.data.role);
         // localStorage.setItem("matrix", "auto");
         localStorage.setItem("refresh", true);
         if (localStorage.getItem('tutorial') == null) {

@@ -34,7 +34,7 @@ const routes = [
   },
   {
     name: "Calender",
-    path: "/calender",
+    path: "/calender/:id",
   },
   {
     name: "Trade History",
