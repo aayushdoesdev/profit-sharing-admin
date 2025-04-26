@@ -77,7 +77,7 @@ const router = createRouter({
       component: NoSidebarLayout,
       children: [
         {
-          path: "/calender",
+          path: "/calender/:id",
           name: "calender",
           component: CalenderView,
         },

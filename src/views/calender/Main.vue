@@ -1,35 +1,57 @@
 <script setup>
-import { ref, computed } from "vue";
+import { ref, computed, watchEffect } from "vue";
+import { useRoute } from "vue-router";
+import { usePositionStore } from "@/stores/positions";
+import { storeToRefs } from "pinia";
 import dayjs from "dayjs";
+
+const route = useRoute();
+const positionStore = usePositionStore();
+
+const { groupedUserPositions } = storeToRefs(positionStore);
+
+// ⚡ Get user positions based on route ID
+const userPositions = computed(() => {
+  return groupedUserPositions.value[route.params.id] || null;
+});
 
 const currentDate = ref(dayjs());
 
-const mockData = {
-  // 📅 March 2025
-  "2025-03-25": { profit: false, amount: -320, ratio: "60:40" },
-  "2025-03-27": { profit: true, amount: 450, ratio: "70:30" },
-  "2025-03-28": { profit: true, amount: 680, ratio: "75:25" },
-  "2025-03-30": { profit: false, amount: -210, ratio: "65:35" },
+// 🔥 New function: Convert userPositions.positions to the required format
+const generateFormattedData = (positions) => {
+  const result = {};
 
-  // 📅 April 2025 (original)
-  "2025-04-01": { profit: false, amount: -432, ratio: "60:40" },
-  "2025-04-02": { profit: false, amount: -532, ratio: "75:25" },
-  "2025-04-05": { profit: false, amount: -632, ratio: "70:30" },
-  "2025-04-09": { profit: false, amount: -432, ratio: "85:15" },
-  "2025-04-10": { profit: true, amount: 732, ratio: "80:20" },
-  "2025-04-11": { profit: true, amount: 832, ratio: "60:40" },
-  "2025-04-12": { profit: true, amount: 932, ratio: "75:25" },
-  "2025-04-23": { profit: true, amount: 1232, ratio: "90:10" },
-  "2025-04-26": { profit: false, amount: -232, ratio: "85:15" },
-  "2025-04-27": { profit: false, amount: -132, ratio: "80:20" },
-  "2025-04-29": { profit: true, amount: 132, ratio: "70:30" },
+  if (!positions || positions.length === 0) return result;
 
-  // 📅 May 2025
-  "2025-05-01": { profit: true, amount: 340, ratio: "60:40" },
-  "2025-05-03": { profit: false, amount: -410, ratio: "65:35" },
-  "2025-05-06": { profit: true, amount: 950, ratio: "85:15" },
-  "2025-05-07": { profit: false, amount: -190, ratio: "75:25" },
+  positions.forEach((position) => {
+    const dateKey = dayjs(position.created_at).format("YYYY-MM-DD");
+
+    // Calculate profit/loss
+    const profitAmount = (position.sell_price - position.buy_price) * position.quantity;
+    const ratio = `${100 - position.admin_share_ratio}:${position.admin_share_ratio}`;
+
+    if (!result[dateKey]) {
+      result[dateKey] = {
+        profit: profitAmount >= 0,
+        amount: profitAmount,
+        ratio: ratio,
+      };
+    } else {
+      result[dateKey].amount += profitAmount;
+      result[dateKey].profit = result[dateKey].amount >= 0;
+    }
+  });
+
+  return result;
 };
+
+// 🆕 Ref: Stores formatted data in the same format as formattedData
+const formattedData = ref({});
+
+// Watch for changes in user positions and generate the formatted data
+watchEffect(() => {
+  formattedData.value = generateFormattedData(userPositions.value?.positions || []);
+});
 
 const daysInMonth = computed(() => {
   const start = currentDate.value.startOf("month");
@@ -70,14 +92,17 @@ const calculateShares = (amount, ratio) => {
   return { userShare, adminShare };
 };
 
+// 🆕 Computed: Use formattedData for current month data
 const filteredMonthData = computed(() => {
-  return Object.entries(mockData)
+  return Object.entries(formattedData.value)
     .filter(([date]) => dayjs(date).isSame(currentDate.value, "month"))
     .sort(([a], [b]) => dayjs(a).diff(dayjs(b)));
 });
 </script>
 
+
 <template>
+  <!-- {{ formattedData }} -->
   <main class="bg-white py-4 h-full overflow-y-auto">
     <div class="px-4">
       <div
@@ -127,41 +152,41 @@ const filteredMonthData = computed(() => {
             class="border min-h-[97px] max-h-[97px] p-1 text-left rounded relative px-2"
             :class="{
               'bg-green-100 border-green-500':
-                mockData[getDateKey(day)]?.profit === true,
+                formattedData[getDateKey(day)]?.profit === true,
               'bg-red-100 border-red-500':
-                mockData[getDateKey(day)]?.profit === false,
+                formattedData[getDateKey(day)]?.profit === false,
             }"
           >
             <div class="flex justify-between items-center font-bold">
               <span>{{ day }}</span>
-              <template v-if="mockData[getDateKey(day)]">
+              <template v-if="formattedData[getDateKey(day)]">
                 <span
                   :class="{
-                    'text-custom-green': mockData[getDateKey(day)].amount > 0,
-                    'text-custom-red': mockData[getDateKey(day)].amount < 0,
+                    'text-custom-green': formattedData[getDateKey(day)].amount > 0,
+                    'text-custom-red': formattedData[getDateKey(day)].amount < 0,
                   }"
                   class="hidden md:block text-xs font-semibold"
                 >
-                  ₹{{ mockData[getDateKey(day)].amount }}
+                  ₹{{ formattedData[getDateKey(day)].amount }}
                 </span>
               </template>
             </div>
 
-            <template v-if="mockData[getDateKey(day)]">
+            <template v-if="formattedData[getDateKey(day)]">
               <div
                 class="hidden xl:block text-[12px] mt-2 leading-tight font-medium space-y-1"
               >
                 <div class="flex items-center justify-between">
                   <p>Share ratio</p>
-                  <p>{{ mockData[getDateKey(day)].ratio }}</p>
+                  <p>{{ formattedData[getDateKey(day)].ratio }}</p>
                 </div>
                 <div class="flex items-center justify-between">
                   <p>User share</p>
                   <p>
-                    {{ mockData[getDateKey(day)].profit ? "+" : "-" }}₹{{
+                    {{ formattedData[getDateKey(day)].profit ? "+" : "-" }}₹{{
                       calculateShares(
-                        mockData[getDateKey(day)].amount,
-                        mockData[getDateKey(day)].ratio
+                        formattedData[getDateKey(day)].amount,
+                        formattedData[getDateKey(day)].ratio
                       ).userShare.toFixed(0)
                     }}
                   </p>
@@ -169,10 +194,10 @@ const filteredMonthData = computed(() => {
                 <div class="flex items-center justify-between">
                   <p>Admin share</p>
                   <p>
-                    {{ mockData[getDateKey(day)].profit ? "+" : "-" }}₹{{
+                    {{ formattedData[getDateKey(day)].profit ? "+" : "-" }}₹{{
                       calculateShares(
-                        mockData[getDateKey(day)].amount,
-                        mockData[getDateKey(day)].ratio
+                        formattedData[getDateKey(day)].amount,
+                        formattedData[getDateKey(day)].ratio
                       ).adminShare.toFixed(0)
                     }}
                   </p>
