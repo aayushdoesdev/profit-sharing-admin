@@ -1,13 +1,17 @@
 <script setup>
-import { ref } from "vue";
-import { useRouter } from "vue-router";
+import { ref, computed } from "vue";
+import { useRouter, RouterLink } from "vue-router";
 import Popup from "@/components/Popup.vue";
 import Tooltip from "@/components/Tooltip.vue";
 import { useUserStore } from "@/stores/users";
+import { usePositionStore } from "@/stores/positions";
 import { storeToRefs } from "pinia";
 
 const userStore = useUserStore();
 const { users } = storeToRefs(userStore);
+
+const positionStore = usePositionStore()
+const {userTotalProfits} = storeToRefs(positionStore)
 
 const router = useRouter();
 const showSidebar = ref(false);
@@ -18,6 +22,21 @@ const isDeletePopup = ref(false);
 const toggleDeletePopup = (button) => {
   isDeletePopup.value = button;
 };
+
+// Combine users and their profits
+const usersWithProfits = computed(() => {
+  return users.value.map(user => {
+    // Find matching profit data
+    const profitData = Object.values(userTotalProfits.value).find(
+      profit => profit.user_id === user.id // Assuming user.id matches user_id
+    );
+
+    return {
+      ...user,
+      totalUserProfit: profitData ? profitData.totalUserProfit : "0.00",
+    };
+  });
+});
 
 // New form data structure matching the payload
 const userData = ref({
@@ -95,7 +114,7 @@ const addUser = async () => {
 
         <tbody>
           <tr
-            v-for="(user, index) in users"
+            v-for="(user, index) in usersWithProfits"
             :key="user.id"
             class="flex items-center justify-between text-left w-full px-4 py-2 transition-all nrml-text tracking-wider border-b border-black border-opacity-10"
           >
@@ -109,9 +128,9 @@ const addUser = async () => {
             
             <td class="min-w-[100px] font-medium w-[10%]">{{ user.broker_name }}</td>
             <td class="min-w-[250px] flex flex-col gap-2 font-medium w-[20%]">
-              <p>{{ user.admin_share_ration }}</p>
+              <p>{{ user.admin_share_ration }} : {{ 100 - user.admin_share_ration }} <span>({{ 100 - user.admin_share_ration }} - User & {{ user.admin_share_ration }} - Admin)</span></p>
             </td>
-            <td class="min-w-[100px] font-medium w-[10%]">555</td>
+            <td class="min-w-[100px] font-medium w-[10%]">{{ user.totalUserProfit }}</td>
             <td class="min-w-[150px] w-[10%]">
               <p
                 :class="[
@@ -147,10 +166,10 @@ const addUser = async () => {
               class="min-w-[100px] w-[15%] flex justify-end items-center gap-4"
             >
               <Tooltip text="Calender">
-                <button
-                  @click="router.push('/calender')"
+                <router-link
+                  :to="`/calender/${user.id}`"
                   class="pi pi-calendar text-[20px]"
-                ></button>
+                ></router-link>
               </Tooltip>
               <Tooltip text="Edit">
                 <button
