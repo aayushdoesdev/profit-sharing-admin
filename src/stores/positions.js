@@ -10,7 +10,7 @@ export const usePositionStore = defineStore("positions", () => {
   //   Get positions
   const getPositions = async () => {
     try {
-      const response = await makeRequest(endpoint, "GET");
+      const response = await makeRequest(endpoint, "GET" , {}, {}, {} , 2 , null);
       if (response.data) {
         positions.value = response.data.positions;
       }
