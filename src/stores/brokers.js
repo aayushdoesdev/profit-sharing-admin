@@ -70,6 +70,15 @@ export const useBrokerStore = defineStore('brokers', () => {
         }
     }
 
+    const deleteBroker = async(brokerId) => {
+        try {
+            await makeRequest(endpoint, 'DELETE', {}, {}, {}, 0, brokerId)
+            await getBrokers()
+        } catch (error) {
+            console.error("Error Deleting Broker" ,error)
+        }
+    }
+
     getBrokers();
     return {
         brokers,
@@ -77,7 +86,8 @@ export const useBrokerStore = defineStore('brokers', () => {
         connectBroker,
         getBrokerByUserId,
         addEdit,
-        getBrokers
+        getBrokers,
+        deleteBroker
     }
 
 })

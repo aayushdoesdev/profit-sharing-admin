@@ -7,6 +7,7 @@ export const useJoinerStore = defineStore('joiners', () => {
 
     const endpoint = "joiners";
     const joiners = ref([]);
+    const joinersByStrategyId = ref([])
 
     const getJoiners = async () => {
         try {
@@ -19,10 +20,35 @@ export const useJoinerStore = defineStore('joiners', () => {
         }
     }
 
+
+    const getJoinersByStrategy = async (id) => {
+        try {
+            const response = await makeRequest(endpoint, "GET", {}, {}, {}, 0, id, "strategy");
+
+            if (response.data) {
+                joinersByStrategyId.value = response.data?.joiners
+            }
+        } catch (error) {
+            console.log("This is error", error)
+        }
+    }
+
+
+    const deleteJoinerById = async (id) => {
+        try {
+             await makeRequest(endpoint, "DELETE", {}, {}, {}, 0, id);
+        } catch (error) {
+            console.log("This is error", error)
+        }
+    }
+
     getJoiners();
     return {
         joiners,
-        getJoiners
+        getJoiners,
+        getJoinersByStrategy,
+        joinersByStrategyId,
+        deleteJoinerById
     }
 
 })
