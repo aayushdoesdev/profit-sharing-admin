@@ -76,7 +76,13 @@ const titleName = computed(() => {
     </div>
 
     <div class="hidden xl:block">
-      <h2 class="heading-text">{{ titleName }}</h2>
+      <div class="flex items-center gap-2">
+        <RouterLink to="/">
+
+          <img src="/svg/back.svg" class=" w-6 " alt="">
+        </RouterLink>
+        <h2 class="heading-text">{{ titleName }}</h2>
+      </div>
       <p v-if="route.path === '/calender'" class="nrml-text opacity-60">
         Home > User management > Calender
       </p>
