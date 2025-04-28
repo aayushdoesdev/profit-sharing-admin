@@ -3,25 +3,25 @@ import { ref } from "vue";
 import Popup from "@/components/Popup.vue";
 import Tooltip from "@/components/Tooltip.vue";
 import { useStrategiesStore } from "@/stores/strategies";
+import { useJoinerStore } from "@/stores/joiners";
 import { storeToRefs } from "pinia";
 
 const strategiesStore = useStrategiesStore();
+const joinerStore = useJoinerStore();
 
 const { strategies } = storeToRefs(strategiesStore);
+const { joinersByStrategyId } = storeToRefs(joinerStore);
 const showSidebar = ref(false);
+const showJoinerSidebar = ref(false);
 const isEditMode = ref(false);
 const editingStrategyId = ref(null);
 const deletingStrategyId = ref(null);
+const deletingJoinerId = ref(null);
+
 
 const isDeletePopupOpen = ref(false);
-const isSqoffPopupOpen = ref(false);
+const isDeleteJoinerPopupOpen = ref(false)
 
-const toggleSqoffPopup = (button) => {
-  isSqoffPopupOpen.value = button;
-};
-const toggleDeletePopup = (button) => {
-  isDeletePopupOpen.value = button;
-};
 
 const form = ref({
   name: "",
@@ -63,6 +63,16 @@ const resetForm = () => {
   };
   isEditMode.value = false;
   editingStrategyId.value = null;
+};
+
+const openJoinerSidebar = async (strategy) => {
+  showJoinerSidebar.value = true;
+
+  try {
+    await joinerStore.getJoinersByStrategy(strategy.id);
+  } catch (error) {
+    console.error(error);
+  }
 };
 
 const openEditSidebar = (strategy) => {
@@ -120,13 +130,33 @@ const editStrategy = async () => {
   }
 };
 
-const deleteStrategy = async (strategy) => {
-  if (!strategy) return;
+const openDeleteJoinerPopup = (strategy) => {
+  isDeleteJoinerPopupOpen.value = true;
+  deletingJoinerId.value = strategy.id;
+};
 
+const deleteJoiner = async () => {
+  if (!deletingJoinerId.value) return;
+
+  try {
+    await joinerStore.deleteJoinerById(deletingJoinerId.value)
+    isDeleteJoinerPopupOpen.value = false;
+  } catch (error) {
+    console.error("Deleting Joiner failed", error);
+  }
+};
+
+const openDeletePopup = (strategy) => {
+  isDeletePopupOpen.value = true;
   deletingStrategyId.value = strategy.id;
+};
+
+const deleteStrategy = async () => {
+  if (!deletingStrategyId.value) return;
 
   try {
     await strategiesStore.deleteStrategy(deletingStrategyId.value);
+    isDeletePopupOpen.value = false;
   } catch (error) {
     console.error("Deleting failed", error);
   }
@@ -185,7 +215,7 @@ const deleteStrategy = async (strategy) => {
             <td class="min-w-[100px] w-[10%]">{{ strategy.strategy_type }}</td>
             <td class="min-w-[100px] w-[10%]">{{ strategy.expiry_date }}</td>
             <td class="min-w-[100px] w-[10%]">
-              <p>₹{{ strategy.entry }}</p>
+              <p>₹ {{ strategy.entry_price }}</p>
               <p>₹{{ strategy.exit }}</p>
             </td>
             <td class="min-w-[100px] w-[10%]">₹{{ strategy.ltp }}</td>
@@ -215,7 +245,10 @@ const deleteStrategy = async (strategy) => {
               </Tooltip>
 
               <Tooltip text="Joiner">
-                <button class="pi pi-pencil text-[18px]"></button>
+                <button
+                  @click="openJoinerSidebar(strategy)"
+                  class="pi pi-pencil text-[18px]"
+                ></button>
               </Tooltip>
 
               <Tooltip text="Order">
@@ -225,7 +258,7 @@ const deleteStrategy = async (strategy) => {
               <Tooltip text="Delete">
                 <button
                   class="pi pi-trash text-[18px]"
-                  @click="deleteStrategy(strategy)"
+                  @click="openDeletePopup(strategy)"
                 ></button>
               </Tooltip>
             </td>
@@ -402,34 +435,86 @@ const deleteStrategy = async (strategy) => {
         </div>
       </transition>
 
-      <Popup :isOpen="isSqoffPopupOpen" @close="toggleSqoffPopup(false)">
-        <img src="/svg/sq-off-img.svg" alt="" class="w-[200px] mx-auto" />
-
+      <transition name="slide">
         <div
-          class="flex flex-col items-center justify-center text-center gap-4 w-full mt-4"
+          v-if="showJoinerSidebar"
+          class="fixed right-0 top-0 h-full w-[400px] md:w-[800px] bg-white shadow-lg z-50 py-4"
         >
-          <div class="">
-            <h2 class="heading-text">Are you sure you want to square off?</h2>
-            <p class="nrml-text">
-              Once confirmed, this action cannot be reversed
-            </p>
+          <div class="flex justify-between items-center mb-4 px-4">
+            <h2 class="text-xl font-bold">Edit Joiners</h2>
+            <div class="flex gap-4">
+              <button
+                @click="showJoinerSidebar = false"
+                class="text-[16px] border border-custom-blue text-custom-blue px-4 py-1 rounded"
+              >
+                Cancel
+              </button>
+            </div>
           </div>
 
-          <div class="flex items-center gap-2 w-full">
-            <button
-              @click="toggleSqoffPopup(false)"
-              class="w-full border border-custom-blue text-custom-blue py-1 rounded-full"
-            >
-              Cancel
-            </button>
-            <button class="w-full bg-custom-blue text-white py-1 rounded-full">
-              Sq Off
-            </button>
-          </div>
+          <table class="w-full">
+            <thead>
+              <tr
+                class="flex items-center justify-between w-full text-left px-4 py-2 text-[14px] font-bold tracking-wide bg-custom-grey text-custom-dark-grey"
+              >
+                <th class="min-w-[150px] w-[15%]">Broker</th>
+                <th class="min-w-[100px] w-[15%]">User</th>
+                <th class="min-w-[100px] w-[10%]">Lot Size</th>
+                <th class="min-w-[100px] w-[10%]">Re Entry</th>
+                <th class="min-w-[100px] w-[15%]">Re Entry Triggered</th>
+                <th class="min-w-[100px] w-[10%]">Active</th>
+                <th class="min-w-[100px] w-[15%]">Action</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <tr
+                v-for="(item, index) in joinersByStrategyId"
+                :key="item.id"
+                class="flex items-center justify-between text-left w-full p-4 transition-all nrml-text tracking-wider border-b border-black border-opacity-10 font-medium"
+              >
+                <td class="min-w-[150px] w-[15%]">
+                  {{ item.broker_userid }}
+                </td>
+                <td class="min-w-[100px] w-[15%]">{{ item.user_name }}</td>
+                <td class="min-w-[100px] w-[10%]">{{ item.lot }}</td>
+                <td class="min-w-[100px] w-[10%]">{{ item.re_entry }}</td>
+                <td class="min-w-[100px] w-[15%]">
+                  {{ item.re_entry_triggered }}
+                </td>
+                <td class="min-w-[100px] w-[10%]">
+                  <label class="inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      v-model="item.is_active"
+                      class="sr-only peer"
+                    />
+                    <div
+                      class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-custom-blue"
+                    ></div>
+                  </label>
+                </td>
+                <td class="min-w-[100px] flex items-center gap-4 w-[15%]">
+                  <Tooltip text="Edit">
+                    <button
+                      @click="openEditModal(broker)"
+                      class="pi pi-pencil text-[18px]"
+                    ></button>
+                  </Tooltip>
+                  <Tooltip text="Delete">
+                    <button
+                      @click="openDeleteJoinerPopup(item)"
+                      class="pi pi-trash text-[18px]"
+                    ></button>
+                  </Tooltip>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
-      </Popup>
+      </transition>
 
-      <Popup :isOpen="isDeletePopupOpen" @close="toggleDeletePopup(false)">
+      <Popup :isOpen="isDeletePopupOpen" @close="openDeletePopup(false)">
         <img src="/svg/delete-img.svg" alt="" class="w-[350px] mx-auto" />
 
         <div
@@ -444,12 +529,45 @@ const deleteStrategy = async (strategy) => {
 
           <div class="flex items-center gap-2 w-full">
             <button
-              @click="toggleDeletePopup(false)"
+              @click="isDeletePopupOpen = false"
               class="w-full border border-custom-blue text-custom-blue py-1 rounded-full"
             >
               Cancel
             </button>
-            <button class="w-full bg-custom-red text-white py-1 rounded-full">
+            <button
+              @click="deleteStrategy"
+              class="w-full bg-custom-red text-white py-1 rounded-full"
+            >
+              Delete
+            </button>
+          </div>
+        </div>
+      </Popup>
+
+      <Popup :isOpen="isDeleteJoinerPopupOpen" @close="openDeleteJoinerPopup(false)">
+        <img src="/svg/delete-img.svg" alt="" class="w-[350px] mx-auto" />
+
+        <div
+          class="flex flex-col items-center justify-center text-center gap-4 w-full mt-4"
+        >
+          <div class="">
+            <h2 class="heading-text">Are you sure you want to the joiner delete?</h2>
+            <p class="nrml-text">
+              Once confirmed, this action cannot be reversed
+            </p>
+          </div>
+
+          <div class="flex items-center gap-2 w-full">
+            <button
+              @click="isDeletePopupOpen = false"
+              class="w-full border border-custom-blue text-custom-blue py-1 rounded-full"
+            >
+              Cancel
+            </button>
+            <button
+              @click="deleteJoiner"
+              class="w-full bg-custom-red text-white py-1 rounded-full"
+            >
               Delete
             </button>
           </div>
