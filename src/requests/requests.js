@@ -91,6 +91,7 @@ const endpoints = ref({
   positions : '/admin/positions',
   alerts: '/admin/alerts',
   brokers : '/admin/brokers',
+  squareOff : '/admin/sequire-off',
 })
 
 const getApiUrl = (endpoint) => {

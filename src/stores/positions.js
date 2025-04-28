@@ -5,8 +5,9 @@ import { defineStore } from "pinia";
 export const usePositionStore = defineStore("positions", () => {
   const endpoint = "positions";
   const positions = ref([]);
+  const idToSqoff = ref(null);
 
-//   Get positions
+  //   Get positions
   const getPositions = async () => {
     try {
       const response = await makeRequest(endpoint, "GET");
@@ -18,8 +19,23 @@ export const usePositionStore = defineStore("positions", () => {
     }
   };
 
+  const sqoffPosition = async () => {
+    try {
+      
+      if (idToSqoff.value) {
+        const response = await makeRequest('squareOff', "PUT", {}, {}, {} , 0 , idToSqoff.value);
+        if (response.data) {
+          await getPositions();
+          idToSqoff.value = null; // Reset idToSqoff after successful sqoff
+        }
+      }
+    } catch (error) {
+      console.log("This is error", error);
+    }
+  }
 
-//   Group the positoin according the strategy and users
+
+  //   Group the positoin according the strategy and users
   const groupedPositions = computed(() => {
     const grouped = {};
 
@@ -77,7 +93,7 @@ export const usePositionStore = defineStore("positions", () => {
     return grouped;
   });
 
-//   Calculate the ratio 
+  //   Calculate the ratio 
   const flatStrategySummary = computed(() => {
     const result = [];
 
@@ -109,82 +125,82 @@ export const usePositionStore = defineStore("positions", () => {
 
 
   //   Calculate total user profit after admin cut
-const userTotalProfits = computed(() => {
-  const result = {};
+  const userTotalProfits = computed(() => {
+    const result = {};
 
-  for (const userKey in groupedPositions.value) {
-    const userGroup = groupedPositions.value[userKey];
-    let totalUserProfit = 0;
+    for (const userKey in groupedPositions.value) {
+      const userGroup = groupedPositions.value[userKey];
+      let totalUserProfit = 0;
 
-    for (const stratKey in userGroup.strategies) {
-      const strat = userGroup.strategies[stratKey];
-      const totalProfit = strat.total_sell_price - strat.total_buy_price;
-      const adminRatio = strat.positions[0]?.admin_share_ratio ?? 0;
-      const userRatio = 100 - adminRatio;
+      for (const stratKey in userGroup.strategies) {
+        const strat = userGroup.strategies[stratKey];
+        const totalProfit = strat.total_sell_price - strat.total_buy_price;
+        const adminRatio = strat.positions[0]?.admin_share_ratio ?? 0;
+        const userRatio = 100 - adminRatio;
 
-      totalUserProfit += (totalProfit * userRatio) / 100;
-    }
+        totalUserProfit += (totalProfit * userRatio) / 100;
+      }
 
-    result[userKey] = {
-      user_id: userGroup.user_id,
-      user_email: userGroup.user_email,
-      user_name: userGroup.user_name,
-      totalUserProfit: totalUserProfit.toFixed(2),
-    };
-  }
-
-  return result;
-});
-
-// Group all strategies' positions together per user
-const groupedUserPositions = computed(() => {
-  const result = {};
-
-  for (const userKey in groupedPositions.value) {
-    const userGroup = groupedPositions.value[userKey];
-
-    if (!result[userGroup.user_id]) {
-      result[userGroup.user_id] = {
+      result[userKey] = {
         user_id: userGroup.user_id,
         user_email: userGroup.user_email,
         user_name: userGroup.user_name,
-        positions: [], // all positions will go here
-        total_quantity: 0,
-        total_buy_price: 0,
-        total_sell_price: 0,
+        totalUserProfit: totalUserProfit.toFixed(2),
       };
     }
 
-    const user = result[userGroup.user_id];
+    return result;
+  });
 
-    for (const stratKey in userGroup.strategies) {
-      const strat = userGroup.strategies[stratKey];
+  // Group all strategies' positions together per user
+  const groupedUserPositions = computed(() => {
+    const result = {};
 
-      // Add all positions
-      user.positions.push(...strat.positions);
+    for (const userKey in groupedPositions.value) {
+      const userGroup = groupedPositions.value[userKey];
 
-      // Sum totals
-      user.total_quantity += strat.total_quantity;
-      user.total_buy_price += strat.total_buy_price;
-      user.total_sell_price += strat.total_sell_price;
+      if (!result[userGroup.user_id]) {
+        result[userGroup.user_id] = {
+          user_id: userGroup.user_id,
+          user_email: userGroup.user_email,
+          user_name: userGroup.user_name,
+          positions: [], // all positions will go here
+          total_quantity: 0,
+          total_buy_price: 0,
+          total_sell_price: 0,
+        };
+      }
+
+      const user = result[userGroup.user_id];
+
+      for (const stratKey in userGroup.strategies) {
+        const strat = userGroup.strategies[stratKey];
+
+        // Add all positions
+        user.positions.push(...strat.positions);
+
+        // Sum totals
+        user.total_quantity += strat.total_quantity;
+        user.total_buy_price += strat.total_buy_price;
+        user.total_sell_price += strat.total_sell_price;
+      }
     }
-  }
 
-  // Optionally calculate total profit for each user
-  for (const userId in result) {
-    const user = result[userId];
-    user.total_profit = user.total_sell_price - user.total_buy_price;
-  }
+    // Optionally calculate total profit for each user
+    for (const userId in result) {
+      const user = result[userId];
+      user.total_profit = user.total_sell_price - user.total_buy_price;
+    }
 
-  return result;
-});
+    return result;
+  });
 
 
 
   //grouped strategy positions for dashboard
   const groupedStrategies = computed(() => {
     const map = new Map()
-  
+
     positions.value.forEach(pos => {
       const key = pos.strategy_id
       if (!map.has(key)) {
@@ -198,18 +214,18 @@ const groupedUserPositions = computed(() => {
           positions: []
         })
       }
-  
+
       const group = map.get(key)
       group.positions.push(pos)
-  
+
       group.buy_price = parseFloat(pos.buy_price) || 0
       group.sell_price = parseFloat(pos.sell_price) || 0
-  
+
       if (pos.status === 'OPEN') {
         group.status = 'OPEN'
       }
     })
-  
+
     return Array.from(map.values())
   })
 
@@ -217,7 +233,9 @@ const groupedUserPositions = computed(() => {
 
   return {
     getPositions,
+    sqoffPosition,
     positions,
+    idToSqoff,
     groupedStrategies,
     groupedPositions,
     flatStrategySummary,

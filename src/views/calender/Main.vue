@@ -24,11 +24,43 @@ const generateFormattedData = (positions) => {
   if (!positions || positions.length === 0) return result;
 
   positions.forEach((position) => {
-    const dateKey = dayjs(position.created_at).format("YYYY-MM-DD");
+    const {
+      created_at,
+      side,
+      status,
+      buy_price = 0,
+      sell_price = 0,
+      last_price = 0,
+      buy_quantity = 0,
+      sell_quantity = 0,
+      admin_share_ratio = 0,
+    } = position;
 
-    // Calculate profit/loss
-    const profitAmount = (position.sell_price - position.buy_price) * position.quantity;
-    const ratio = `${100 - position.admin_share_ratio}:${position.admin_share_ratio}`;
+    const dateKey = dayjs(created_at).format("YYYY-MM-DD");
+
+    let profitAmount = 0;
+
+    if (status === "OPEN") {
+      if (side === "BUY") {
+        profitAmount = (last_price - buy_price) * buy_quantity;
+      } else if (side === "SELL") {
+        profitAmount = (sell_price - last_price) * sell_quantity;
+      } else {
+        console.warn(`Unknown side: ${side} in OPEN position`);
+      }
+    } else if (status === "CLOSED") {
+      if (side === "BUY") {
+        profitAmount = (sell_price - buy_price) * sell_quantity;
+      } else if (side === "SELL") {
+        profitAmount = (sell_price - buy_price) * buy_quantity;
+      } else {
+        console.warn(`Unknown side: ${side} in CLOSED position`);
+      }
+    } else {
+      console.warn(`Unknown status: ${status} in position`);
+    }
+
+    const ratio = `${100 - admin_share_ratio}:${admin_share_ratio}`;
 
     if (!result[dateKey]) {
       result[dateKey] = {
@@ -44,6 +76,8 @@ const generateFormattedData = (positions) => {
 
   return result;
 };
+
+
 
 // 🆕 Ref: Stores formatted data in the same format as formattedData
 const formattedData = ref({});
@@ -103,6 +137,7 @@ const filteredMonthData = computed(() => {
 
 <template>
   <!-- {{ formattedData }} -->
+    <!-- {{ userPositions?.positions[0] }} -->
   <main class="bg-white py-4 h-full overflow-y-auto">
     <div class="px-4">
       <div
