@@ -75,7 +75,7 @@
                             </p>
                         </td>
                         <td class="min-w-[120px] w-[10%] flex justify-end items-center gap-2 ">
-                            <button @click="togglePopup(true)" class="sq-off-btn flex items-center gap-1">
+                            <button @click="togglePopup(true , pos.id)" class="sq-off-btn flex items-center gap-1">
                                 <i class="pi pi-sync"></i>
                                 <p>Sq Off</p>
                             </button>
@@ -103,7 +103,7 @@
               class="w-full border border-custom-blue text-custom-blue py-1 rounded-full">
               Cancel
             </button>
-            <button class="w-full bg-custom-blue text-white py-1 rounded-full">
+            <button @click="sqoff" class="w-full bg-custom-blue text-white py-1 rounded-full">
               Sq Off
             </button>
           </div>
@@ -119,48 +119,14 @@ import { storeToRefs } from 'pinia';
 import { ref } from 'vue';
 
 const positionStore = usePositionStore();
-const { positions } = storeToRefs(positionStore);
+const { positions , idToSqoff } = storeToRefs(positionStore);
 
 const isPopupOpen = ref(false);
 
-const togglePopup = (button) => {
+const togglePopup = (button , id = null) => {
   isPopupOpen.value = button;
+  if(id) idToSqoff.value = id;
 };
-
-const positions1 = ref([
-    {
-        tradeId: "FER527SJ2SJ2929",
-        strategy: "Most profitable source",
-        script: "BTC/USD 54368OOCE",
-        trades: [
-            { type: "B", price: 8329.89, time: "09:09AM/12 Mar" },
-            { type: "S", price: 8329.89, time: "09:09AM/12 Mar" },
-        ],
-        broker: "Zerodha",
-        profit: "+5473",
-        user: 'Roshni Chandra',
-        product: 'Intraday',
-        qty: '25',
-        exchange: 'NSE',
-        status: 'open',
-    },
-    {
-        script: "BTC/USD 54368OOCE",
-        tradeId: "RTY83929JS2A838",
-        strategy: "BankNifty Beast",
-        trades: [
-            { type: "B", price: 7400.12, time: "09:09AM/12 Mar" },
-            { type: "S", price: 7650.5, time: "09:09AM/12 Mar" },
-        ],
-        broker: "Zerodha",
-        profit: "+250.38",
-        user: 'Roshni Chandra',
-        product: 'Intraday',
-        qty: '25',
-        exchange: 'NSE',
-        status: 'open',
-    },
-]);
 
 function formatDateTime(isoString) {
   const date = new Date(isoString);
@@ -178,6 +144,12 @@ function formatDateTime(isoString) {
 
   return `${formattedHours}:${formattedMinutes}${ampm}/${day.toString().padStart(2, '0')} ${month}`;
 }
+
+const sqoff = async () => {
+  await positionStore.sqoffPosition();
+  togglePopup(false);
+  
+};
 
 
 </script>
