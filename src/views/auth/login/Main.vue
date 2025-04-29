@@ -42,13 +42,6 @@ const login = async () => {
     errors.value.password = v$.value.password.$error
       ? "Password must be at least 6 characters long."
       : "";
-    // toast.addToast('Error', 'Please fill the entire form! ', 'warning', 3000);
-    // toast.addToast({
-    //   severity: 'warning',
-    //   summary: 'Error',
-    //   detail: 'Please fill the entire form!',
-    //   life: 3000
-    // });
     return;
   }
   if (!v$.value.$invalid) {
@@ -65,24 +58,15 @@ const login = async () => {
       );
 
       if (response) {
-        // currentStep.value = "setup";
-        // setTokenAndRole(response.data.access_token, response.data.user_role);
         localStorage.setItem("token", `Bearer ${response.data.token}`);
-        // console.log(response.token)
         localStorage.setItem("role", response.data.role);
-        // localStorage.setItem("matrix", "auto");
         localStorage.setItem("refresh", true);
         if (localStorage.getItem('tutorial') == null) {
           localStorage.setItem("tutorial", true);
         }
         
-
         errorMsg.value = "";
         setisAuthenticated(true, response.data.user_role);
-
-        // websocket connection
-        // const tickerStore = useTickerStore();
-        // tickerStore.startWebSocket(response.data.access_token);
 
         // Navigate to dashboard 
         const redirectPage = localStorage.getItem('redirectAfterLogin');
@@ -92,8 +76,6 @@ const login = async () => {
         } else{
           router.push("/")
         }
-        
-        // toast.addToast('Success', 'Successfully logged in!', 'success', 3000);
       } else {
         errorMsg.value = state["login"].error?.message;
       }
@@ -109,62 +91,102 @@ const login = async () => {
   }
 };
 
-
+// Added function to handle Enter key press
+const handleEnterKey = () => {
+  if (checkTnC.value) {
+    login();
+  }
+};
 </script>
 
 <template>
-  <section class="flex items-center min-h-screen font-geist">
-    <div class="w-[50%] bg-gray-700 h-screen"></div>
-    <div class="w-[50%] flex flex-col items-center justify-start py-10 px-32">
-      <h1 class="font-semibold text-[40px]">Sign In</h1>
+  <section class="flex flex-col md:flex-row items-center min-h-screen font-geist">
+    <!-- Left side - banner area -->
+    <div class="hidden lg:block lg:w-1/2 bg-[#1A1919] min-h-[50vh] md:h-screen text-center px-4 py-8 md:py-10">
+      <div class="flex items-center justify-center">
+        <img src="/svg/logo.svg" alt="Logo" class="h-10 md:h-auto">
+      </div>
+      
+      <div class="flex items-center flex-col gap-2 mt-6 md:mt-10">
+        <h2 class="leading-tight text-transparent bg-clip-text text-2xl md:text-[38.2px] max-w-xl font-semibold bg-gradient-to-r from-[#387ED1] to-[#ffffff]">
+          One platform. Multiple brokers. Infinite opportunities
+        </h2>
+        <p class="text-sm md:text-[18px] text-[#ADB2B9] font-[400] px-4">
+          Seamlessly manage users, monitor performance, and earn smarter every day.
+        </p>
+      </div>
+      
+      <div class="mt-6 md:mt-10">
+        <img src="/login.png" alt="login" class="max-w-full mx-auto" />
+      </div>
+    </div>
+    
+    <!-- Right side - login form -->
+    <div class="w-full md:w-1/2 flex flex-col items-center justify-start py-8 md:py-10 px-6 md:px-10 lg:px-20 xl:px-32">
+      <h1 class="font-semibold text-2xl md:text-[40px]">Sign In</h1>
 
-      <form @submit.prevent="login" @keydown.enter.prevent="handleEnterKey" class="w-full mt-6 space-y-4">
+      <form @submit.prevent="login" @keydown.enter.prevent="handleEnterKey" class="w-full mt-4 md:mt-6 space-y-4">
         <div class="space-y-1">
           <p>Email</p>
           <input
-            type="text"
-            placeholder="Enter your email" v-model="loginFormData.email"
+            type="email"
+            placeholder="Enter your email" 
+            v-model="loginFormData.email"
             class="w-full border border-black border-opacity-40 py-2 rounded-md outline-none px-4 bg-transparent"
           />
-          <p v-if="errors.email" class="text-red-500 nrml-text">
-                {{ errors.email }}
-              </p>
+          <p v-if="errors.email" class="text-red-500 text-sm">
+            {{ errors.email }}
+          </p>
         </div>
+        
         <div class="space-y-1">
           <p>Password</p>
           <input
-            type="text"
+            type="password"
             v-model="loginFormData.password"
             placeholder="Enter Password"
             class="w-full border border-black border-opacity-40 py-2 rounded-md outline-none px-4 bg-transparent"
           />
-          <p v-if="errors.password" class="text-red-500 nrml-text">
-                {{ errors.password }}
-              </p>
-              <p v-if="errorMsg" class="text-red-500 nrml-text">
-                {{ errorMsg }}
-              </p>
+          <p v-if="errors.password" class="text-red-500 text-sm">
+            {{ errors.password }}
+          </p>
+          <p v-if="errorMsg" class="text-red-500 text-sm">
+            {{ errorMsg }}
+          </p>
         </div>
-        <div class="flex items-center justify-between text-[12px]">
+        
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between text-xs md:text-sm gap-2">
           <div class="flex items-center gap-2">
-            <input type="checkbox" v-model="checkTnC"/>
-            <p>I agree the <a href="" class="hover:underline text-custom-blue">XYZ T&C</a> and <a href="" class="hover:underline text-custom-blue">Privacy Policy</a></p>
+            <input type="checkbox" v-model="checkTnC" id="tnc" class="cursor-pointer"/>
+            <label for="tnc" class="cursor-pointer">
+              I agree the <a href="" class="hover:underline text-custom-blue">XYZ T&C</a> and <a href="" class="hover:underline text-custom-blue">Privacy Policy</a>
+            </label>
           </div>
 
           <router-link to="/forgot-password" class="text-blue-500 font-semibold">Forget Password</router-link>
         </div>
 
-        <button type="submit" :disabled="!checkTnC" class="bg-[#387ED1] w-full text-white py-2 rounded-md">
+        <button 
+          type="submit" 
+          :disabled="!checkTnC" 
+          :class="['w-full py-2 rounded-md', checkTnC ? 'bg-[#387ED1] text-white' : 'bg-gray-300 text-gray-500 cursor-not-allowed']"
+        >
           Submit
         </button>
 
-        <p class="text-center opacity-50">
-          Don’t have a account?
-          <router-link class="opacity-100 font-semibold" to="/register"
-            >Register</router-link
-          >
+        <p class="text-center opacity-50 text-sm md:text-base">
+          Don't have a account?
+          <router-link class="opacity-100 font-semibold" to="/register">Register</router-link>
         </p>
       </form>
     </div>
   </section>
 </template>
+
+<style scoped>
+@media screen and (max-width: 640px) {
+  .font-geist {
+    font-size: 14px;
+  }
+}
+</style>

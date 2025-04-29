@@ -7,6 +7,8 @@ export const usePositionStore = defineStore("positions", () => {
   const positions = ref([]);
   const idToSqoff = ref(null);
   const strategyIdToSqoff = ref(null);
+  const brokerPositions = ref([]);
+  const positionCount = ref(0)
 
   //   Get positions
   const getPositions = async () => {
@@ -14,11 +16,23 @@ export const usePositionStore = defineStore("positions", () => {
       const response = await makeRequest(endpoint, "GET" , {}, {}, {} , 2 , null);
       if (response.data) {
         positions.value = response.data.positions;
+        positionCount.value = response.data?.count;
       }
     } catch (error) {
       console.log("This is error", error);
     }
   };
+
+  const getPositionByBrokerId = async (id) => {
+    try {
+        const response = await makeRequest(endpoint, "GET", {}, {}, {}, 0, id, 'broker');
+        if (response.data) {
+            brokerPositions.value = response.data?.positions
+        }
+    } catch (error) {
+        console.log("This is error", error)
+    }
+}
 
   const sqoffPosition = async () => {
     try {
@@ -261,9 +275,12 @@ export const usePositionStore = defineStore("positions", () => {
     sqoffPosition,
     sqoffPositionByStrategy,
     closePositions,
+    getPositionByBrokerId,
+    brokerPositions,
     positions,
     strategyIdToSqoff,
     idToSqoff,
+    positionCount,
     groupedStrategies,
     groupedPositions,
     flatStrategySummary,
