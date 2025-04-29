@@ -7,6 +7,7 @@ export const useMasterOrderStore = defineStore("master-order", () => {
     const endpoint = "masterOrders";
   
     const masterorders = ref([]);
+    const masterOrderByStrategyId = ref([])
   
     const getMasterOrders = async () => {
       try {
@@ -19,10 +20,43 @@ export const useMasterOrderStore = defineStore("master-order", () => {
           console.log("This is error" ,error)
       }
     };
+
+    const getMasterOrdersByStrategyId = async (id) => {
+      try {
+        const res = await makeRequest(endpoint, "GET", {}, {}, {}, 0, id, "strategy")
+
+        if(res.data){
+          masterOrderByStrategyId.value = res.data?.orders
+          return res.data?.orders
+        }
+      } catch (error) {
+        console.log("Error in fetching the specfic data" ,error)
+      }
+    }
+
+    const placeMasterOrder = async(formData) => {
+      try {
+        await makeRequest(endpoint, "POST", formData)
+      } catch (error) {
+        console.error("Error in placing master order", error)
+      }
+    }
+
+    const editMasterOrder = async (formData) => {
+      try {
+        await makeRequest(endpoint, "PUT", formData, {}, {}, 0, formData.strategy_id, "strategy")
+      } catch (error) {
+        console.error("Error in updating master order", error)
+      }
+    }
   
     getMasterOrders()
   
     return{
-        masterorders
+        masterorders,
+        placeMasterOrder,
+        editMasterOrder,
+        getMasterOrdersByStrategyId,
+        masterOrderByStrategyId
     }
   });
