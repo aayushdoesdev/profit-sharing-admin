@@ -1,9 +1,6 @@
 <script setup>
 import Positions from './position/Positions.vue';
 
-
-
-
 </script>
 
 <template>
@@ -15,7 +12,7 @@ import Positions from './position/Positions.vue';
           <img src="/svg/dash1.svg" class="h-[30px] w-[30px]"></img>
         </div>
         <hr class="border border-dashed" />
-        <div class="flex items-center justify-between">
+        <div class=" flex items-center justify-between">
           <p class="heading-text">
             1658 <span class="small-text">active</span>
           </p>

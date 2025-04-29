@@ -5,8 +5,10 @@ import { defineStore } from "pinia";
 
 export const useOrderStore = defineStore('orders', () => {
 
-    const endpoint = "orders";
+    const endpoint = "manualOrders";
     const orders = ref([]);
+    const strategyOrders = ref([]);
+    const idToDelete = ref(null);
 
     const getOrders = async () => {
         try {
@@ -19,10 +21,39 @@ export const useOrderStore = defineStore('orders', () => {
         }
     }
 
+    const getOrderByStrategyId = async (id) => {
+        try {
+            const response = await makeRequest(endpoint, "GET", {}, {}, {}, 0, id, 'strategy');
+            if (response.data) {
+                strategyOrders.value = response.data?.orders
+            }
+        } catch (error) {
+            console.log("This is error", error)
+        }
+    }
+
+    const deleteOrder = async () => {
+        try {
+            if (idToDelete.value) {
+                const response = await makeRequest(endpoint, "DELETE", {}, {}, {}, 0, idToDelete.value);
+                if(response.data)
+                {
+                    idToDelete.value = null;
+                }
+            }
+
+        } catch (error) {
+            console.log("This is error", error)
+        }
+    }
     getOrders();
     return {
         orders,
-        getOrders
+        getOrderByStrategyId,
+        getOrders,
+        deleteOrder,
+        idToDelete,
+        strategyOrders
     }
 
 })
