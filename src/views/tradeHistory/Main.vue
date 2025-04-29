@@ -1,6 +1,11 @@
 <script setup>
 import { ref } from "vue";
 import Popup from "@/components/Popup.vue";
+import { usePositionStore } from "@/stores/positions";
+import { storeToRefs } from "pinia";
+
+const positionStore = usePositionStore()
+const {positions} = storeToRefs(positionStore)
 
 const activeSection = ref("orders");
 const isPopupOpen = ref(false);
@@ -13,28 +18,28 @@ const togglePopup = (button) => {
   isPopupOpen.value = button;
 };
 
-const positions = ref([
-  {
-    tradeId: "FER527SJ2SJ2929",
-    strategy: "Most profitable source",
-    trades: [
-      { type: "B", price: 8329.89 },
-      { type: "S", price: 8329.89 },
-    ],
-    broker: "32",
-    profit: "+5473",
-  },
-  {
-    tradeId: "RTY83929JS2A838",
-    strategy: "BankNifty Beast",
-    trades: [
-      { type: "B", price: 7400.12 },
-      { type: "S", price: 7650.5 },
-    ],
-    broker: "Zerodha",
-    profit: "+250.38",
-  },
-]);
+// const positions = ref([
+//   {
+//     tradeId: "FER527SJ2SJ2929",
+//     strategy: "Most profitable source",
+//     trades: [
+//       { type: "B", price: 8329.89 },
+//       { type: "S", price: 8329.89 },
+//     ],
+//     broker: "32",
+//     profit: "+5473",
+//   },
+//   {
+//     tradeId: "RTY83929JS2A838",
+//     strategy: "BankNifty Beast",
+//     trades: [
+//       { type: "B", price: 7400.12 },
+//       { type: "S", price: 7650.5 },
+//     ],
+//     broker: "Zerodha",
+//     profit: "+250.38",
+//   },
+// ]);
 
 const orders = ref([
   {
@@ -130,31 +135,29 @@ const orders = ref([
                 <td
                   class="min-w-[200px] flex flex-col gap-2 font-medium w-[20%]"
                 >
-                  <p>{{ pos.strategy }}</p>
+                  <p>{{ pos.strategy_name }}</p>
                 </td>
                 <td
                   class="min-w-[200px] flex flex-col gap-2 font-semibold w-[20%]"
                 >
                   <div
-                    v-for="trade in pos.trades"
-                    :key="trade.type"
                     class="flex items-center gap-2"
                   >
                     <p
                       :class="[
                         'px-1 rounded font-bold',
-                        trade.type === 'B'
+                        pos.side === 'BUY'
                           ? 'bg-green-100 text-green-600'
                           : 'bg-red-100 text-red-600',
                       ]"
                     >
-                      {{ trade.type }}
+                      {{ pos.side }}
                     </p>
-                    <p>{{ trade.price }}</p>
+                    <p>{{ pos.buy_price }}</p>
                   </div>
                 </td>
                 <td class="min-w-[100px] w-[10%]">
-                  <p class="font-bold rounded w-fit">{{ pos.broker }}</p>
+                  <p class="font-bold rounded w-fit">{{ pos.broker_name }}</p>
                 </td>
                 <td class="min-w-[100px] w-[10%]">
                   <p class="text-green-600 font-bold rounded w-fit">

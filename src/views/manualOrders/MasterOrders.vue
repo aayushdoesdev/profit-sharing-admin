@@ -1,14 +1,19 @@
 <script setup>
 import Tooltip from "@/components/Tooltip.vue";
-import { ref } from "vue";
+import { ref, reactive } from "vue";
 import { useMasterOrderStore } from "@/stores/masterOrders";
+import { useStrategiesStore } from "@/stores/strategies";
 import { storeToRefs } from "pinia";
 
 const masterOrderStore = useMasterOrderStore();
+const { masterorders } = storeToRefs(masterOrderStore);
 
-const {masterorders} = storeToRefs(masterOrderStore)
+const strategyStore = useStrategiesStore();
+const { strategies } = storeToRefs(strategyStore);
 
 const showSidebar = ref(false);
+const editingStrategyId = ref(null);
+const masterOrderByStrategyId = ref([])
 
 function formatDate(inputDate) {
   const date = new Date(inputDate);
@@ -21,6 +26,78 @@ function formatDate(inputDate) {
     hour12: true, // optional: for AM/PM style, remove if you prefer 24-hour
   });
 }
+const orderTypes = ["MARKET", "LIMIT", "SL-LIMIT", "SL-MARKET"];
+
+const form = reactive({
+  strategy_id: null,
+  tradingsymbol: "",
+  exchange: "BSE",
+  variety: "regular",
+  order_type: "MARKET",
+  transaction_type: "BUY",
+  product: "MIS",
+  validity: "DAY",
+  quantity: 0,
+  price: 0,
+  trigger_price: 0,
+  stop_loss: 0,
+  target: 0,
+  is_sltgt_enabled: false,
+  pnl_track: false,
+});
+
+const btnToggle = (active) =>
+  `px-4 py-2 rounded border ${
+    active
+      ? "bg-blue-600 text-white border-blue-600"
+      : "bg-white border-gray-300 text-gray-600"
+  }`;
+
+const tabButton = (type) =>
+  `px-4 py-2 ${
+    form.order_type === type
+      ? "border-b-2 border-blue-600 text-blue-600 font-semibold"
+      : "text-gray-600"
+  }`;
+
+const submitOrder = async () => {
+  try {
+    await masterOrderStore.placeMasterOrder(form);
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+const openEditSidebar = async (order) => {
+  try {
+    const response =  await masterOrderStore.getMasterOrdersByStrategyId(order.strategy_id);
+    masterOrderByStrategyId.value = response
+    editingStrategyId.value = order.strategy_id;
+    showSidebar.value = true;
+
+    // Populate form using response from store
+
+    form.value = {
+      strategy_id: data.strategy_id,
+      tradingsymbol: data.tradingsymbol,
+      exchange: data.exchange,
+      variety: data.variety,
+      order_type: data.order_type,
+      transaction_type: data.transaction_type,
+      product: data.product,
+      validity: data.validity,
+      quantity: data.quantity,
+      price: data.price,
+      trigger_price: data.trigger_price,
+      stop_loss: data.stop_loss,
+      target: data.target,
+      is_sltgt_enabled: data.is_sltgt_enabled,
+      pnl_track: data.pnl_track,
+    };
+  } catch (error) {
+    console.error("Error loading order for edit:", error);
+  }
+};
 </script>
 
 <template>
@@ -88,7 +165,9 @@ function formatDate(inputDate) {
                 </p>
                 <p>
                   {{ order.price }}
-                  <span class="text-[10px]"> {{ formatDate(order.created_at) }} </span>
+                  <span class="text-[10px]">
+                    {{ formatDate(order.created_at) }}
+                  </span>
                 </p>
               </div>
             </td>
@@ -120,6 +199,7 @@ function formatDate(inputDate) {
             <td class="w-[10%] text-center flex justify-end items-center gap-4">
               <Tooltip text="Edit">
                 <button
+                  @click="openEditSidebar(order)"
                   class="pi pi-pen-to-square text-custom-blue text-[16px]"
                 ></button>
               </Tooltip>
@@ -135,107 +215,178 @@ function formatDate(inputDate) {
     <transition name="slide">
       <div
         v-if="showSidebar"
-        class="fixed right-0 top-0 h-full w-[400px] md:w-[800px] bg-white shadow-lg z-50 p-6"
+        class="fixed right-0 top-0 h-full w-full md:w-[600px] bg-white shadow-lg z-50 p-6 overflow-y-auto"
       >
         <!-- Header -->
-        <div class="flex justify-between items-center mb-4">
-          <h2 class="text-xl font-bold">Add Manual Order</h2>
-          <div class="flex gap-4">
+        <div class="flex justify-between items-center mb-6">
+          <h2 class="text-xl font-semibold">Manual Order</h2>
+          <div class="space-x-2">
             <button
               @click="showSidebar = false"
-              class="text-[16px] border border-custom-blue text-custom-blue px-4 py-1 rounded"
+              class="px-4 py-1 border rounded text-blue-600 border-blue-600"
             >
               Cancel
             </button>
             <button
-              @click="currentStep = currentStep === 1 ? 2 : 1"
-              class="text-[16px] bg-custom-blue text-white font-semibold px-4 py-1 rounded"
+              @click="submitOrder"
+              class="px-4 py-1 bg-blue-600 text-white rounded"
             >
               Done
             </button>
           </div>
         </div>
 
-        <!-- Form -->
-        <div class="nrml-text space-y-4 mt-4 overflow-y-auto">
-          <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
-            <div>
-              <label class="opacity-70">User Broker</label>
-              <input type="text" class="custom-input" />
-            </div>
-            <div>
-              <label class="opacity-70">Matrix Strategy</label>
-              <input type="text" class="custom-input" />
-            </div>
-            <div>
-              <label class="opacity-70">Trading Symbol</label>
-              <input type="text" class="custom-input" />
-            </div>
-            <div>
-              <label class="opacity-70">PAN Number</label>
-              <input type="text" class="custom-input" />
-            </div>
-            <div>
-              <label class="opacity-70">Order varity</label>
-              <input type="text" class="custom-input" />
-            </div>
-            <div>
-              <label class="opacity-70">Transaction Type</label>
-              <input type="text" class="custom-input" />
-            </div>
-            <div>
-              <label class="opacity-70">Product Type</label>
-              <input type="text" class="custom-input" />
-            </div>
-            <div>
-              <label class="opacity-70">Order Varity</label>
-              <input type="text" class="custom-input" />
-            </div>
-            <div>
-              <label class="opacity-70">Validity</label>
-              <input type="text" class="custom-input" />
-            </div>
-            <div>
-              <label class="opacity-70">Filled Quantity</label>
-              <input type="text" class="custom-input" />
-            </div>
-            <div>
-              <label class="opacity-70">Pending Quantity</label>
-              <input type="text" class="custom-input" />
-            </div>
-            <div>
-              <label class="opacity-70">Canceled Quantity</label>
-              <input type="text" class="custom-input" />
-            </div>
-            <div>
-              <label class="opacity-70">Price</label>
-              <input type="text" class="custom-input" />
-            </div>
-            <div>
-              <label class="opacity-70">Trigger Price</label>
-              <input type="text" class="custom-input" />
-            </div>
-            <div>
-              <label class="opacity-70">Average Price</label>
-              <input type="text" class="custom-input" />
-            </div>
-            <div>
-              <label class="opacity-70">Status</label>
-              <input type="text" class="custom-input" />
-            </div>
-            <div>
-              <label class="opacity-70">Created Time</label>
-              <input type="text" class="custom-input" />
-            </div>
-            <div>
-              <label class="opacity-70">Update Time</label>
-              <input type="text" class="custom-input" />
-            </div>
-            <div>
-              <label class="opacity-70">Status Message</label>
-              <input type="text" class="custom-input" />
-            </div>
+        <!-- Strategy & Symbol -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+          <div class="space-y-1">
+            <label class="block text-sm font-medium text-gray-600"
+              >Strategy</label
+            >
+            <select v-model="form.strategy_id" class="input">
+              <option value="" disabled>Select strategy</option>
+              <option
+                v-for="strategy in strategies"
+                :key="strategy.id"
+                :value="strategy.id"
+              >
+                {{ strategy.name }}
+              </option>
+            </select>
           </div>
+          <div class="space-y-1">
+            <label class="block text-sm font-medium text-gray-600"
+              >Trading Symbol</label
+            >
+            <input
+              v-model="form.tradingsymbol"
+              type="text"
+              placeholder="Search for symbols"
+              class="input"
+            />
+          </div>
+        </div>
+
+        <!-- Transaction Type -->
+        <div class="mb-4 nrml-text">
+          <label class="block font-medium text-gray-600 mb-2"
+            >Transaction</label
+          >
+          <div class="flex justify-between gap-4">
+            <button
+              :class="btnToggle(form.transaction_type === 'BUY')"
+              class="w-full"
+              @click="form.transaction_type = 'BUY'"
+            >
+              Buy
+            </button>
+            <button
+              :class="btnToggle(form.transaction_type === 'SELL')"
+              class="w-full"
+              @click="form.transaction_type = 'SELL'"
+            >
+              Sell
+            </button>
+          </div>
+        </div>
+
+        <!-- Tabs for Order Types -->
+        <div class="mb-6 nrml-text">
+          <div class="flex gap-6 border-b">
+            <button
+              v-for="type in orderTypes"
+              :key="type"
+              :class="tabButton(type)"
+              class="w-full"
+              @click="form.order_type = type"
+            >
+              {{ type }}
+            </button>
+          </div>
+        </div>
+
+        <!-- Core Inputs -->
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
+          <div>
+            <label class="text-sm text-gray-600">Quantity</label>
+            <input v-model.number="form.quantity" type="number" class="input" />
+          </div>
+          <div>
+            <label class="text-sm text-gray-600">Price</label>
+            <input
+              v-model.number="form.price"
+              type="number"
+              class="input"
+              :disabled="
+                form.order_type === 'MARKET' || form.order_type === 'SL-MARKET'
+              "
+            />
+          </div>
+          <div v-if="form.order_type.includes('SL')">
+            <label class="text-sm text-gray-600">Trigger Price</label>
+            <input
+              v-model.number="form.trigger_price"
+              type="number"
+              class="input"
+              :disabled="
+                form.order_type === 'MARKET' || form.order_type === 'LIMIT'
+              "
+            />
+          </div>
+        </div>
+
+        <!-- SL/Target Inputs -->
+        <div
+          v-if="form.is_sltgt_enabled"
+          class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6"
+        >
+          <div>
+            <label class="text-sm text-gray-600">Target</label>
+            <input v-model.number="form.target" type="number" class="input" />
+          </div>
+          <div>
+            <label class="text-sm text-gray-600">Stop Loss</label>
+            <input
+              v-model.number="form.stop_loss"
+              type="number"
+              class="input"
+            />
+          </div>
+        </div>
+
+        <!-- Enable SL/Target Toggle -->
+        <div class="flex items-center gap-2 mb-4">
+          <label class="relative inline-flex items-center cursor-pointer">
+            <input
+              v-model="form.is_sltgt_enabled"
+              type="checkbox"
+              class="sr-only peer"
+            />
+            <div
+              class="w-10 h-5 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:bg-blue-500 transition-colors duration-300"
+            ></div>
+            <div
+              class="absolute left-0.5 top-0.5 w-4 h-4 bg-white rounded-full transition-transform duration-300 transform peer-checked:translate-x-5"
+            ></div>
+          </label>
+          <span class="text-sm text-gray-600">Enable SL/Target</span>
+        </div>
+
+        <!-- Track PNL Toggle -->
+        <div class="flex items-center gap-2 mb-6">
+          <label class="relative inline-flex items-center cursor-pointer">
+            <input
+              v-model="form.pnl_track"
+              type="checkbox"
+              class="sr-only peer"
+            />
+            <div
+              class="w-10 h-5 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:bg-blue-500 transition-colors duration-300"
+            ></div>
+            <div
+              class="absolute left-0.5 top-0.5 w-4 h-4 bg-white rounded-full transition-transform duration-300 transform peer-checked:translate-x-5"
+            ></div>
+          </label>
+          <span class="text-sm text-gray-600">Track PNL</span>
         </div>
       </div>
     </transition>
@@ -261,5 +412,9 @@ function formatDate(inputDate) {
 .slide-enter-active,
 .slide-leave-active {
   transition: transform 0.3s ease;
+}
+
+.input {
+  @apply w-full px-3 py-1 border border-gray-300 rounded outline-none;
 }
 </style>
