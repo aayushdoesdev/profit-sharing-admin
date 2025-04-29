@@ -9,6 +9,7 @@ export const useOrderStore = defineStore('orders', () => {
     const orders = ref([]);
     const strategyOrders = ref([]);
     const idToDelete = ref(null);
+    const brokerOrders = ref([]);
 
     const getOrders = async () => {
         try {
@@ -26,6 +27,16 @@ export const useOrderStore = defineStore('orders', () => {
             const response = await makeRequest(endpoint, "GET", {}, {}, {}, 0, id, 'strategy');
             if (response.data) {
                 strategyOrders.value = response.data?.orders
+            }
+        } catch (error) {
+            console.log("This is error", error)
+        }
+    }
+    const getOrderByBrokerId = async (id) => {
+        try {
+            const response = await makeRequest(endpoint, "GET", {}, {}, {}, 0, id, 'broker');
+            if (response.data) {
+                brokerOrders.value = response.data?.orders
             }
         } catch (error) {
             console.log("This is error", error)
@@ -52,6 +63,8 @@ export const useOrderStore = defineStore('orders', () => {
         getOrderByStrategyId,
         getOrders,
         deleteOrder,
+        getOrderByBrokerId,
+        brokerOrders,
         idToDelete,
         strategyOrders
     }

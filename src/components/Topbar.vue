@@ -1,10 +1,14 @@
 <script setup>
+import { useProfileStore } from "@/stores/profile";
+import { storeToRefs } from "pinia";
 import { ref, computed } from "vue";
 import { useRoute, RouterLink, useRouter } from "vue-router";
 
 const route = useRoute();
 const router = useRouter();
 const showSidebar = ref(false);
+const profileStore = useProfileStore();
+const { profile } = storeToRefs(profileStore);
 
 const routes = [
   {
@@ -57,6 +61,7 @@ const routes = [
   },
 ];
 
+
 const titleName = computed(() => {
   const matched = routes.find((r) => r.path === route.path);
   return matched?.name || "Page";
@@ -89,9 +94,10 @@ const titleName = computed(() => {
     </div>
 
     <div class="flex items-center gap-4">
-      <div class="h-[40px] w-[40px] bg-slate-500"></div>
+      
       <router-link to="/profile">
-        <div class="h-[40px] w-[40px] bg-slate-500 rounded-full"></div>
+        <img class="h-[40px] w-[40px] rounded-full" :src="profile?.profile_pic_url" alt="">
+        
       </router-link>
     </div>
   </div>
