@@ -11,14 +11,14 @@
       </div>
     </div>
 
-    <div class="px-4">
+    <!-- <div class="px-4">
       <div class="bg-custom-grey flex items-center gap-2 w-fit px-4 rounded-md nrml-text">
         <i class="pi pi-search opacity-50"></i>
         <input type="text" class="bg-transparent py-2 outline-none" placeholder="Search for strategy" />
       </div>
-    </div>
+    </div> -->
 
-    <div class="mt-4 xl:max-h-[400px] overflow-y-auto">
+    <div class="xl:max-h-[400px] overflow-y-auto">
       <table class="w-full">
         <thead class="sticky top-0 z-20">
           <tr
