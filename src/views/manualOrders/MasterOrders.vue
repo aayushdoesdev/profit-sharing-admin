@@ -134,7 +134,6 @@ const openEditSidebar = async (order) => {
             <th class="w-[15%] font-medium">QTY</th>
             <th class="w-[10%] font-medium">LTP</th>
             <th class="w-[10%] font-medium">Trigger Price</th>
-            <th class="w-[10%] font-medium">Profit</th>
             <th class="w-[10%] font-medium">Status</th>
             <th class="w-[10%] text-right font-medium">Action</th>
           </tr>
@@ -175,15 +174,6 @@ const openEditSidebar = async (order) => {
             <td class="w-[15%]">{{ order.quantity }}</td>
             <!-- <td class="w-[10%]">{{ order.ltp }}</td> -->
             <td class="w-[10%]">{{ order.trigger_price }}</td>
-            <!-- <td
-              class="w-[10%]"
-              :class="{
-                'text-custom-green': order.profit >= 0,
-                'text-custom-red': order.profit < 0,
-              }"
-            >
-              {{ order.profit > 0 ? `+${order.profit}` : order.profit }}
-            </td> -->
             <td class="w-[10%]">
               <p
                 :class="[

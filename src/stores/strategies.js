@@ -6,6 +6,7 @@ export const useStrategiesStore = defineStore("strategies", () => {
   const endpoint = "strategies";
 
   const strategies = ref([]);
+  const strategiesCount = ref()
 
   const getStrategies = async () => {
     try {
@@ -13,6 +14,7 @@ export const useStrategiesStore = defineStore("strategies", () => {
 
       if(response.data){
         strategies.value = response.data.strategies
+        strategiesCount.value = response.data?.count
         // console.log(manualorders.value)
       }
     } catch (error) {
@@ -58,6 +60,7 @@ export const useStrategiesStore = defineStore("strategies", () => {
     strategies,
     createStrategy,
     updateStrategy,
-    deleteStrategy
+    deleteStrategy,
+    strategiesCount
   }
 });

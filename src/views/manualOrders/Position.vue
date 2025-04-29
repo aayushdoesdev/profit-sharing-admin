@@ -13,16 +13,16 @@
                 <thead>
                     <tr
                         class="flex items-center justify-between w-full text-left px-4 py-2 text-[14px] font-bold tracking-wide bg-custom-grey text-custom-dark-grey">
-                        <th class="min-w-[50px] w-[5%] text-left">S.NO</th>
-                        <th class="min-w-[160px] w-[15%] text-left">Strategy/Symbol</th>
-                        <th class="min-w-[160px] w-[15%] text-left">Side/Price</th>
-                        <th class="min-w-[120px] w-[10%] text-left">User/Broker</th>
-                        <th class="min-w-[100px] w-[5%] text-left ">Product</th>
-                        <th class="min-w-[70px] w-[5%] text-left">QTY</th>
-                        <th class="min-w-[100px] w-[5%] text-left">Exchange</th>
-                        <th class="min-w-[100px] w-[5%] text-left">Status</th>
-                        <th class="min-w-[80px] w-[5%] text-left">PNL</th>
-                        <th class="min-w-[120px] w-[10%] text-right">Action</th>
+                        <th class="min-w-[50px] w-[5%] text-left font-medium">S.NO</th>
+                        <th class="min-w-[160px] w-[15%] text-left font-medium">Strategy/Symbol</th>
+                        <th class="min-w-[160px] w-[15%] text-left font-medium">Side/Price</th>
+                        <th class="min-w-[120px] w-[10%] text-left font-medium">User/Broker</th>
+                        <th class="min-w-[100px] w-[5%] text-left font-medium ">Product</th>
+                        <th class="min-w-[70px] w-[5%] text-left font-medium">QTY</th>
+                        <th class="min-w-[100px] w-[5%] text-left font-medium">Exchange</th>
+                        <th class="min-w-[100px] w-[5%] text-left font-medium">Status</th>
+                        <th class="min-w-[80px] w-[5%] text-left font-medium">PNL</th>
+                        <th class="min-w-[120px] w-[10%] text-right font-medium">Action</th>
                     </tr>
                 </thead>
 
