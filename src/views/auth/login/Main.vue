@@ -13,6 +13,8 @@ import {
 
 const router = useRouter()
 
+const checkTnC = ref(false);
+
 const loginFormData = reactive({
   email: "",
   password: "",
@@ -121,7 +123,7 @@ const login = async () => {
           <p>Email</p>
           <input
             type="text"
-            placeholder="yourname@gmail.com" v-model="loginFormData.email"
+            placeholder="Enter your email" v-model="loginFormData.email"
             class="w-full border border-black border-opacity-40 py-2 rounded-md outline-none px-4 bg-transparent"
           />
           <p v-if="errors.email" class="text-red-500 nrml-text">
@@ -133,7 +135,7 @@ const login = async () => {
           <input
             type="text"
             v-model="loginFormData.password"
-            placeholder="Password"
+            placeholder="Enter Password"
             class="w-full border border-black border-opacity-40 py-2 rounded-md outline-none px-4 bg-transparent"
           />
           <p v-if="errors.password" class="text-red-500 nrml-text">
@@ -145,14 +147,14 @@ const login = async () => {
         </div>
         <div class="flex items-center justify-between text-[12px]">
           <div class="flex items-center gap-2">
-            <input type="checkbox" />
-            <p>I agree the XYZ T&C and privacy policy</p>
+            <input type="checkbox" v-model="checkTnC"/>
+            <p>I agree the <a href="" class="hover:underline text-custom-blue">XYZ T&C</a> and <a href="" class="hover:underline text-custom-blue">Privacy Policy</a></p>
           </div>
 
           <router-link to="/forgot-password" class="text-blue-500 font-semibold">Forget Password</router-link>
         </div>
 
-        <button type="submit" class="bg-[#387ED1] w-full text-white py-2 rounded-md">
+        <button type="submit" :disabled="!checkTnC" class="bg-[#387ED1] w-full text-white py-2 rounded-md">
           Submit
         </button>
 

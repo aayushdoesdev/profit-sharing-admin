@@ -6,6 +6,7 @@ export const usePositionStore = defineStore("positions", () => {
   const endpoint = "positions";
   const positions = ref([]);
   const idToSqoff = ref(null);
+  const strategyIdToSqoff = ref(null);
 
   //   Get positions
   const getPositions = async () => {
@@ -25,13 +26,37 @@ export const usePositionStore = defineStore("positions", () => {
       if (idToSqoff.value) {
         const response = await makeRequest('squareOff', "PUT", {}, {}, {} , 0 , idToSqoff.value);
         if (response.data) {
-          await getPositions();
+          
           idToSqoff.value = null; // Reset idToSqoff after successful sqoff
         }
       }
     } catch (error) {
       console.log("This is error", error);
     }
+  }
+
+  const sqoffPositionByStrategy = async () => {
+    try {
+      
+      if (strategyIdToSqoff.value) {
+        const response = await makeRequest('squareOff', "PUT", {}, {}, {} , 0 , strategyIdToSqoff.value , 'strategy');
+        if (response.data) {
+          
+          strategyIdToSqoff.value = null; // Reset idToSqoff after successful sqoff
+        }
+      }
+    } catch (error) {
+      console.log("This is error", error);
+    }
+  }
+
+  const closePositions = async () => {
+    try {
+      const res = await makeRequest('squareOff' , 'PUT' , {} , {} , {} , 0 , 0 , 'all') 
+    } catch (error) {
+      console.log("This is error", error);
+    }
+
   }
 
 
@@ -234,7 +259,10 @@ export const usePositionStore = defineStore("positions", () => {
   return {
     getPositions,
     sqoffPosition,
+    sqoffPositionByStrategy,
+    closePositions,
     positions,
+    strategyIdToSqoff,
     idToSqoff,
     groupedStrategies,
     groupedPositions,

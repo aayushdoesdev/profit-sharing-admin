@@ -36,7 +36,7 @@ export const useStrategiesStore = defineStore("strategies", () => {
   const updateStrategy = async (id, updatedData) => {
     try {
       await makeRequest(endpoint, "PUT", updatedData, {}, {}, 0, id);
-      await getStrategies();
+     
     } catch (error) {
       console.error("Error updating strategy", error);
     }
@@ -46,7 +46,7 @@ export const useStrategiesStore = defineStore("strategies", () => {
   const deleteStrategy = async (id) => {
     try {
       await makeRequest(endpoint, "DELETE", {}, {}, {}, 0, id);
-      await getStrategies();
+     
     } catch (error) {
       console.error("Error deleting strategy", error);
     }

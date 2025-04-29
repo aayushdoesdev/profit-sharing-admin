@@ -148,7 +148,7 @@ const makeApiRequest = async (config,wait,endpoint,id) => {
       return response.data;
     } 
     else {
-      // ManageApiResponse(response, endpoint,config.method);
+      ManageApiResponse(response, endpoint,config.method);
       return response.data
     }
   } catch (error) {
@@ -172,7 +172,7 @@ const makeApiRequest = async (config,wait,endpoint,id) => {
     state[endpoint].loading = false;
 
     if(endpoint !== 'login' && endpoint !== 'register' && endpoint !== 'verifyOTP' && endpoint !== 'sendForgotOTP' && endpoint !== 'forgot'){
-      // ManageApiResponse(error.response, endpoint,config.method);
+      ManageApiResponse(error.response, endpoint,config.method);
     }
 
     return "";
