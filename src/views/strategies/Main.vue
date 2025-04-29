@@ -5,18 +5,24 @@ import Tooltip from "@/components/Tooltip.vue";
 import { useStrategiesStore } from "@/stores/strategies";
 import { useJoinerStore } from "@/stores/joiners";
 import { storeToRefs } from "pinia";
+import OrderSidebar from "./OrderSidebar.vue";
+import { useOrderStore } from "@/stores/orders";
 
 const strategiesStore = useStrategiesStore();
 const joinerStore = useJoinerStore();
+const orderStore = useOrderStore();
 
 const { strategies } = storeToRefs(strategiesStore);
 const { joinersByStrategyId } = storeToRefs(joinerStore);
+const { strategyOrders } = storeToRefs(orderStore);
+
 const showSidebar = ref(false);
 const showJoinerSidebar = ref(false);
 const isEditMode = ref(false);
 const editingStrategyId = ref(null);
 const deletingStrategyId = ref(null);
 const deletingJoinerId = ref(null);
+const showOrderModal = ref(false);
 
 
 const isDeletePopupOpen = ref(false);
@@ -70,6 +76,16 @@ const openJoinerSidebar = async (strategy) => {
 
   try {
     await joinerStore.getJoinersByStrategy(strategy.id);
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+const openOrderSidebar = async (strategy) => {
+  showOrderModal.value = true;
+
+  try {
+    await orderStore.getOrderByStrategyId(strategy.id);
   } catch (error) {
     console.error(error);
   }
@@ -252,7 +268,7 @@ const deleteStrategy = async () => {
               </Tooltip>
 
               <Tooltip text="Order">
-                <button class="pi pi-briefcase text-[18px]"></button>
+                <button @click="openOrderSidebar(strategy)" class="pi pi-briefcase text-[18px]"></button>
               </Tooltip>
 
               <Tooltip text="Delete">
@@ -513,6 +529,8 @@ const deleteStrategy = async () => {
           </table>
         </div>
       </transition>
+
+      <OrderSidebar :showOrderModal="showOrderModal" @close="showOrderModal = false"/>
 
       <Popup :isOpen="isDeletePopupOpen" @close="openDeletePopup(false)">
         <img src="/svg/delete-img.svg" alt="" class="w-[350px] mx-auto" />

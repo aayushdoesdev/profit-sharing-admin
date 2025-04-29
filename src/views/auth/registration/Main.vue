@@ -244,7 +244,7 @@ const submitVerifyOtp = async () => {
               type="checkbox" 
               :class="{ 'border-red-500': validate.isAgree.$error }"
             />
-            <p>I agree the XYZ T&C and privacy policy</p>
+            <p>I agree the <a href="" class="hover:underline text-custom-blue">XYZ T&C</a> and <a href="" class="hover:underline text-custom-blue">Privacy Policy</a></p>
           </div>
           <template v-if="validate.isAgree.$error">
             <div class="text-red-500 text-sm mt-1">

@@ -74,8 +74,9 @@
                   {{ strategy.status }}
                 </p>
               </td>
+              
               <td class="min-w-[200px] w-[15%] flex justify-end items-center gap-4">
-                <button @click="togglePopup(true)" class="sq-off-btn">
+                <button @click="togglePopup(true , null , strategy.strategy_id)" class="sq-off-btn">
                   <i class="pi pi-sync"></i>
                   <p>Square Off All</p>
                 </button>
@@ -114,7 +115,7 @@
                 </p>
               </td>
               <td class="min-w-[200px] w-[15%] flex justify-end items-center gap-4">
-                <button @click="togglePopup(true)" class="sq-off-btn">
+                <button @click="togglePopup(true, position.id)" class="sq-off-btn">
                   <i class="pi pi-sync"></i>
                   <p>Square Off</p>
                 </button>
@@ -144,7 +145,7 @@
             class="w-full border border-custom-blue text-custom-blue py-1 rounded-full">
             Cancel
           </button>
-          <button class="w-full bg-custom-blue text-white py-1 rounded-full">
+          <button @click="handleSqoff()" class="w-full bg-custom-blue text-white py-1 rounded-full">
             Sq Off
           </button>
         </div>
@@ -160,65 +161,42 @@ import { storeToRefs } from 'pinia';
 import { computed, ref } from 'vue';
 
 const positionStore = usePositionStore();
-const { groupedStrategies } = storeToRefs(positionStore);
+const { groupedStrategies, idToSqoff, strategyIdToSqoff } = storeToRefs(positionStore);
 
 const isOpen = ref(null); // null means no open row
 const isPopupOpen = ref(false);
 const toggle = (index) => {
   isOpen.value = isOpen.value === index ? null : index;
 };
-const togglePopup = (button) => {
+const togglePopup = (button, id = null, stratid = null) => {
   isPopupOpen.value = button;
+  if (id) {
+    idToSqoff.value = id;
+  }
+  if (stratid) {
+    strategyIdToSqoff.value = stratid;
+  }
+  if (!id && !stratid) {
+    idToSqoff.value = null;
+    strategyIdToSqoff.value = null;
+  }
+
 };
 
-// Mock Data
-const positions1 = ref([
-  {
-    name: "Britex Superhero",
-    openCount: 3,
-    buyPrice: 8329.89,
-    sellPrice: 8329.89,
-    pnl: "+5473",
-    status: "Open",
-    script: "GHEY368WI2WY62WSH2",
-  },
-  {
-    name: "Alpha Momentum",
-    openCount: 2,
-    buyPrice: 9124.23,
-    sellPrice: 9154.11,
-    pnl: "+3021",
-    status: "Open",
-    script: "AJSD8293JKLQWEHJSA",
-  },
-  {
-    name: "Bear Trap",
-    openCount: 1,
-    buyPrice: 4300.0,
-    sellPrice: 4275.5,
-    pnl: "-245",
-    status: "Closed",
-    script: "BDHF28374DFWE84HD",
-  },
-  {
-    name: "Quantum Edge",
-    openCount: 4,
-    buyPrice: 6750.0,
-    sellPrice: 6815.0,
-    pnl: "+650",
-    status: "Open",
-    script: "QEHD823HFD823FD",
-  },
-  {
-    name: "Speedster",
-    openCount: 2,
-    buyPrice: 7230.25,
-    sellPrice: 7255.9,
-    pnl: "+103",
-    status: "Closed",
-    script: "SPDTRH823HRF823",
-  },
-]);
+const handleSqoff = async () => {
+  if (idToSqoff.value) {
+    await positionStore.sqoffPosition();
+
+  }
+  else if (strategyIdToSqoff.value) {
+    await positionStore.sqoffPositionByStrategy()
+  }
+  else {
+    await positionStore.closePositions();
+  }
+  isPopupOpen.value = false;
+
+};
 </script>
 
 <style lang="scss" scoped></style>
