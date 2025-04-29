@@ -1,6 +1,6 @@
 import { ref, toRefs,reactive , computed} from 'vue';
 import  router  from "@/router/index";
-// import { ManageApiResponse } from "./manageResponse";
+import { ManageApiResponse } from "./manageResponse";
 import config from '../../matrixcnfg.js';
 
 
@@ -91,7 +91,9 @@ const endpoints = ref({
   masterOrders: '/admin/master/orders',
   strategies: '/admin/strategies',
   joiners : '/admin/joiners',
-  positions : '/admin/positions',
+  positions : '/admin/manual/positions',
+  positionHistory: '/admin/positions',
+  orderHistory: '/admin/orders',
   alerts: '/admin/alerts',
   brokers : '/admin/brokers',
   squareOff : '/admin/sequire-off',
@@ -154,7 +156,7 @@ const makeApiRequest = async (config,wait,endpoint,id) => {
   } catch (error) {
     if(error.message=="Network Error"){
       state[endpoint].error={...error,statusText:error.message}
-    }else if (error.response.status==401) {
+    }else if (error.response && error.response.status==401) {
       // debugger
       state[endpoint].error = error.response; // Set the error state for status 401
       if(endpoint !== 'forgot'){
