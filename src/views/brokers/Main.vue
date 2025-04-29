@@ -4,8 +4,14 @@ import { useBrokerStore } from "@/stores/brokers";
 import { storeToRefs } from "pinia";
 import Popup from "@/components/Popup.vue";
 import Tooltip from "@/components/Tooltip.vue";
+import OrderModal from "./OrderPositionModal.vue";
+import { useOrderStore } from "@/stores/orders";
+import { usePositionStore } from "@/stores/positions";
 
 const brokerStore = useBrokerStore();
+const orderStore = useOrderStore();
+const positionStore = usePositionStore();
+
 const { brokers, idToEdit } = storeToRefs(brokerStore);
 
 const showSidebar = ref(false);
@@ -165,7 +171,9 @@ const openHoldingSidebar = (broker) => {
 }
 
 
-const openOrderPositionSidebar = (order) => {
+const openOrderPositionSidebar = (broker) => {
+  orderStore.getOrderByBrokerId(broker.id);
+  positionStore.getPositionByBrokerId(broker.id)
   showOrderPositionSidebar.value = true
 }
 </script>
@@ -549,85 +557,7 @@ const openOrderPositionSidebar = (order) => {
     </transition>
 
     <!-- ! ORDERS AND POSITIONS -->
-    <transition name="slide">
-      <div
-        v-if="showOrderPositionSidebar"
-        class="fixed right-0 top-0 h-full w-[400px] md:w-[800px] bg-white shadow-lg z-50 py-4"
-      >
-        <div class="flex justify-between items-center mb-4 px-4">
-          <h2 class="text-xl font-bold">Order and Positions</h2>
-          <div class="flex gap-4">
-            <button
-              @click="showOrderPositionSidebar = false"
-              class="text-[16px] border border-custom-blue text-custom-blue px-4 py-1 rounded"
-            >
-              Cancel
-            </button>
-          </div>
-        </div>
-
-        <table class="w-full">
-          <thead>
-            <tr
-              class="flex items-center justify-between w-full text-left px-4 py-2 text-[14px] font-bold tracking-wide bg-custom-grey text-custom-dark-grey"
-            >
-              <th class="min-w-[150px] w-[15%]">Time</th>
-              <th class="min-w-[100px] w-[15%]">Ticker</th>
-              <th class="min-w-[100px] w-[10%]">Side</th>
-              <th class="min-w-[100px] w-[10%]">Order Type</th>
-              <th class="min-w-[100px] w-[15%]">Price</th>
-              <th class="min-w-[100px] w-[10%]">Avg price</th>
-              <th class="min-w-[100px] w-[15%]">QTY</th>
-              <th class="min-w-[100px] w-[15%]">Status</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            <!-- <tr
-              v-for="(item, index) in joinersByStrategyId"
-              :key="item.id"
-              class="flex items-center justify-between text-left w-full p-4 transition-all nrml-text tracking-wider border-b border-black border-opacity-10 font-medium"
-            >
-              <td class="min-w-[150px] w-[15%]">
-                {{ item.broker_userid }}
-              </td>
-              <td class="min-w-[100px] w-[15%]">{{ item.user_name }}</td>
-              <td class="min-w-[100px] w-[10%]">{{ item.lot }}</td>
-              <td class="min-w-[100px] w-[10%]">{{ item.re_entry }}</td>
-              <td class="min-w-[100px] w-[15%]">
-                {{ item.re_entry_triggered }}
-              </td>
-              <td class="min-w-[100px] w-[10%]">
-                <label class="inline-flex items-center cursor-pointer">
-                  <input
-                    type="checkbox"
-                    v-model="item.is_active"
-                    class="sr-only peer"
-                  />
-                  <div
-                    class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-custom-blue"
-                  ></div>
-                </label>
-              </td>
-              <td class="min-w-[100px] flex items-center gap-4 w-[15%]">
-                <Tooltip text="Edit">
-                  <button
-                    @click="openEditModal(broker)"
-                    class="pi pi-pencil text-[18px]"
-                  ></button>
-                </Tooltip>
-                <Tooltip text="Delete">
-                  <button
-                    @click="openDeleteJoinerPopup(item)"
-                    class="pi pi-trash text-[18px]"
-                  ></button>
-                </Tooltip>
-              </td>
-            </tr> -->
-          </tbody>
-        </table>
-      </div>
-    </transition>
+    <OrderModal :showOrderPositionSidebar="showOrderPositionSidebar" @close="showOrderPositionSidebar = false" />
 
     <Popup :isOpen="isDeletePopupOpen" @close="openDeletePopup(false)">
       <img src="/svg/delete-img.svg" alt="" class="w-[350px] mx-auto" />

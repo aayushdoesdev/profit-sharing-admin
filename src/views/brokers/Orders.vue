@@ -1,12 +1,6 @@
 <template>
     <div class="h-[80vh] overflow-auto">
-        <div class="flex items-center justify-between px-4">
-            <div class="bg-custom-grey flex items-center gap-2 w-fit px-4 rounded-md nrml-text">
-                <i class="pi pi-search opacity-50"></i>
-                <input type="text" class="bg-transparent py-1 outline-none" placeholder="Search for user" />
-
-            </div>
-        </div>
+        
         <div class="mt-4 overflow-x-auto">
             <table class="w-[99%]">
                 <thead>
@@ -24,7 +18,7 @@
                 </thead>
 
                 <tbody>
-                    <tr v-for="(order, index) in orders" 
+                    <tr v-for="(order, index) in brokerOrders"  :key="order.id"
                         class="flex items-center justify-between text-left w-full p-4 transition-all nrml-text tracking-wider border-b border-black border-opacity-10 font-medium">
                         <td class="min-w-[50px] w-[5%]">{{ index + 1 }}</td>
                         <td class="min-w-[180px] w-[15%] ">
@@ -90,34 +84,7 @@ import { useOrderStore } from '@/stores/orders';
 import { storeToRefs } from 'pinia';
 
 const manualOrderStore = useOrderStore();
-const { orders } = storeToRefs(manualOrderStore);
-
-// const orders = ref([
-//   {
-//     strategy: "Hunter Matrix NFT",
-//     script: "BTC/USD 54368OOCE",
-//     side: { type: "B", price: 8329.89, time: "09:09AM/12 Mar" },
-//     broker: "Dhan",
-//     brokerId: "DHAN4368HDW9E",
-//     qty: "0/25",
-//     triggerPrice: 'Null',
-//     ltp: '200',
-//     profit: "5473",
-//     status: "Successful",
-//   },
-//   {
-//     strategy: "Intraday Swing",
-//     script: "ETH/USD 84930XTDS",
-//     side: { type: "S", price: 4230.45, time: "10:21AM/13 Mar" },
-//     broker: "Zerodha",
-//     brokerId: "ZERO8383JSK2",
-//     qty: "15/15",
-//     triggerPrice: 'Null',
-//     ltp: '200',
-//     profit: "5473",
-//     status: "Pending",
-//   },
-// ]);
+const { brokerOrders } = storeToRefs(manualOrderStore);
 
 function formatDateTime(isoString) {
   const date = new Date(isoString);

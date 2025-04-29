@@ -8,7 +8,7 @@ export const useToastStore = defineStore('toastData', () => {
     const showToastData = ref(false)
 
     
-    const addToast = (heading = "", message = "", type = "secondary", life=3000) => {
+    const addToast = (heading = "", message = "", type = "error", life=3000) => {
         toastData.value = {
             id: Date.now(),
             show: true,

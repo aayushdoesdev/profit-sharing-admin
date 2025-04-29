@@ -3,7 +3,6 @@ import Toastify from "toastify-js";
 import dom from "@left4code/tw-starter/dist/js/dom";
 import { canMakeRequest } from '@/requests/requests';
 import { useUserStore } from '@/stores/users';
-import { useManualOrderStore } from '@/stores/manualOrders';
 import { useMasterOrderStore } from '@/stores/masterOrders';
 import { useStrategiesStore } from '@/stores/strategies';
 import { useJoinerStore } from '@/stores/joiners';
@@ -11,6 +10,7 @@ import { usePositionStore } from '@/stores/positions';
 import { useAlertsStore } from '@/stores/alerts';
 import { useBrokerStore } from '@/stores/brokers';
 import { useToastStore } from '@/stores/toast';
+import { useOrderStore } from '@/stores/orders';
 
 let messageType = ref('');
 
@@ -94,81 +94,75 @@ const statusMessages = {
 
 const getMethods = ref({
     users: 'getUsers',
-    manualOrders: 'getManualOrders',
+    manualOrders: 'getOrders',
     masterOrders: 'getMasterOrders',
     strategies: 'getStrategies',
     joiners: 'getJoiners',
     positions: 'getPositions',
     alerts: 'getAlerts',
     brokers: 'getBrokers',
+    squareOff: 'getPositions',
 
 })
 
 function showToast(toastTitle, message, toastType, duration = 3000) {
     const toastStore = useToastStore();
-    toastStore.addToast(toastTitle, message, toastType, duration);
+    toastStore.addToast(toastTitle , message, toastType, duration);
 }
 
 const storeFunctions = {
     users: useUserStore,
-    manualOrders: useManualOrderStore,
+    manualOrders: useOrderStore,
     masterOrders: useMasterOrderStore,
     strategies: useStrategiesStore,
     joiners: useJoinerStore,
     positions: usePositionStore,
     alerts: useAlertsStore,
     brokers: useBrokerStore,
+    squareOff : usePositionStore
 
 };
 
 function ManageApiResponse(response, endpoint, method) {
-
-    let toastTitle = '', toastType = '';
     if (endpoint === 'positionCSVData') {
-        showToast("No data to download", false);
-        return
+        addToast("Notice", "No data to download", "info");
+        return;
     }
+
     try {
-        // if(endpoint!=='profile' && endpoint !=="videos"){
         if (endpoint !== 'profile') {
-            // if(response.status===200){
-            //     if (endpoint==='generateToken'){
-            //         statusMessages[response.status]="Success: "+response.data.message
-            //     }else if(method==='DELETE'){
-            //         let name = messageName[endpoint]
+            const status = response?.status;
+            const responseMessage = response?.data?.message || 'No message provided';
+            const statusMessage = statusMessages[status] || 'Response';
+            const fullMessage = `${responseMessage}`;
 
-            //         statusMessages[response.status]="Success: "+name+' deleted successfully'
-            //     }else{
-            //         let name = messageName[endpoint]
+            // Determine toast type and title
+            let toastType = "info";
+            let toastTitle = statusMessage;
 
-            //         statusMessages[response.status]="Success: "+name+' updated successfully'
-            //     }
-
-            // }else if(response.status===201){
-            //     let name = messageName[endpoint]
-
-            //     statusMessages[response.status]="Success: "+name+' created successfully'
-            // }
-
-
-
-            const message = statusMessages[response.status] + response.data.message || 'Unknown status code';
-            toastTitle = statusMessages[response.status];
-            toastType = response.status >= 200 && response.status < 300 ? 'success' : 'error';
-            if (response.status == 401 && canMakeRequest.value == false) {
-                toastTitle = 'Error:';
-            } else {
-                showToast(message, response.status >= 200 && response.status < 300);
+            if (status >= 200 && status < 300) {
+                toastType = "success";
+                toastTitle = "Success";
+            } else if (status === 401) {
+                toastType = canMakeRequest.value === false ? "error" : "warn";
+                toastTitle = "Unauthorized";
+            } else if (status >= 400 && status < 500) {
+                toastType = "error";
+                toastTitle = "Client Error";
+            } else if (status >= 500) {
+                toastType = "error";
+                toastTitle = "Server Error";
             }
 
-            if (endpoint === 'generateToken') {
-                endpoint = 'brokers'
-            } else if (endpoint === 'strtgposSqOff') {
-                endpoint = 'strategies'
-            }
+            // Show the toast
+            showToast(toastTitle, fullMessage, toastType, 3000);
 
-            if ((response.status >= 200 && response.status < 300)) {
-                toastTitle = 'Success:'
+            // Endpoint remapping if needed
+            if (endpoint === 'generateToken') endpoint = 'brokers';
+            if (endpoint === 'strtgposSqOff') endpoint = 'strategies';
+
+            // Call the store function if available
+            if (toastType === "success") {
                 const storeFunction = storeFunctions[endpoint];
                 if (typeof storeFunction === 'function') {
                     storeFunction()[getMethods.value[endpoint]]();
@@ -177,16 +171,16 @@ function ManageApiResponse(response, endpoint, method) {
                 }
             }
         } else {
-            showToast(toastTitle , response.data.message, toastType ,3000 );
+            // Special case for profile
+            const msg = response?.data?.message || 'No message';
+            showToast("Info", msg, "info", 3000);
         }
 
     } catch (error) {
-        console.error('Error:', error);
-        throw error;
+        console.error('Error in ManageApiResponse:', error);
+        showToast("Error", "Unexpected error occurred", "error", 3000);
     }
 }
-
-
 
 
 function ManageWebsocketResponse(response) {

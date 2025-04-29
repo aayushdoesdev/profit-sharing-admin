@@ -7,13 +7,14 @@ import { useJoinerStore } from "@/stores/joiners";
 import { storeToRefs } from "pinia";
 import OrderSidebar from "./OrderSidebar.vue";
 import { useOrderStore } from "@/stores/orders";
+import JoinerEdit from "./JoinerEdit.vue";
 
 const strategiesStore = useStrategiesStore();
 const joinerStore = useJoinerStore();
 const orderStore = useOrderStore();
 
 const { strategies } = storeToRefs(strategiesStore);
-const { joinersByStrategyId } = storeToRefs(joinerStore);
+const { joinersByStrategyId  , joinerToEdit} = storeToRefs(joinerStore);
 const { strategyOrders } = storeToRefs(orderStore);
 
 const showSidebar = ref(false);
@@ -27,6 +28,12 @@ const showOrderModal = ref(false);
 
 const isDeletePopupOpen = ref(false);
 const isDeleteJoinerPopupOpen = ref(false)
+const showJoinerEditModal = ref(false);
+
+const openEditModal = (joiner) => {
+  joinerToEdit.value = joiner;
+  showJoinerEditModal.value = true;
+}
 
 
 const form = ref({
@@ -177,10 +184,17 @@ const deleteStrategy = async () => {
     console.error("Deleting failed", error);
   }
 };
+
+const handleActive = async (id ,value) => {
+  await strategiesStore.updateStrategy(id, {
+    is_active: value
+  });
+};
 </script>
 
 <template>
   <main class="bg-white py-2 overflow-y-auto">
+    <JoinerEdit :isOpen="showJoinerEditModal" @close="showJoinerEditModal = false"/>
     <div class="flex items-center justify-between px-4 nrml-text">
       <div class="bg-custom-grey flex items-center gap-2 w-fit px-4 rounded-md">
         <i class="pi pi-search opacity-50"></i>
@@ -243,7 +257,7 @@ const deleteStrategy = async () => {
             </td>
             <td class="min-w-[100px] w-[10%]">
               <label class="relative inline-flex items-center cursor-pointer">
-                <input type="checkbox" class="sr-only peer" />
+                <input @click="handleActive(strategy.id ,!strategy.is_active)" v-model="strategy.is_active" type="checkbox" class="sr-only peer" />
                 <div
                   class="w-10 h-5 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:bg-blue-500 transition-colors duration-300"
                 ></div>
@@ -285,7 +299,7 @@ const deleteStrategy = async () => {
       <transition name="slide">
         <div
           v-if="showSidebar"
-          class="fixed right-0 top-0 h-full w-[400px] md:w-[600px] bg-white shadow-lg z-50 p-6"
+          class="fixed right-0 top-0 h-full w-[400px] md:w-[600px] bg-white shadow-lg z-40 p-6"
         >
           <!-- Header -->
           <div class="flex justify-between items-center mb-4">
@@ -454,7 +468,7 @@ const deleteStrategy = async () => {
       <transition name="slide">
         <div
           v-if="showJoinerSidebar"
-          class="fixed right-0 top-0 h-full w-[400px] md:w-[800px] bg-white shadow-lg z-50 py-4"
+          class="fixed right-0 top-0 h-full w-[400px] md:w-[800px] bg-white shadow-lg z-40 py-4"
         >
           <div class="flex justify-between items-center mb-4 px-4">
             <h2 class="text-xl font-bold">Edit Joiners</h2>
@@ -513,7 +527,7 @@ const deleteStrategy = async () => {
                 <td class="min-w-[100px] flex items-center gap-4 w-[15%]">
                   <Tooltip text="Edit">
                     <button
-                      @click="openEditModal(broker)"
+                      @click="openEditModal(item)"
                       class="pi pi-pencil text-[18px]"
                     ></button>
                   </Tooltip>
