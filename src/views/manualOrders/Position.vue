@@ -4,7 +4,7 @@
             <div class="bg-custom-grey flex items-center gap-2 w-fit px-4 rounded-md nrml-text">
                 <i class="pi pi-search opacity-50"></i>
 
-                <input type="text" class="bg-transparent py-1 outline-none" placeholder="Search for user" />
+                <input type="text" class="bg-transparent py-1 outline-none" v-model="searchQuery" placeholder="Search for user" />
 
             </div>
         </div>
@@ -15,7 +15,7 @@
                         class="flex items-center justify-between w-full text-left px-4 py-2 text-[14px] font-bold tracking-wide bg-custom-grey text-custom-dark-grey">
                         <th class="min-w-[50px] w-[5%] text-left font-medium">S.NO</th>
                         <th class="min-w-[160px] w-[15%] text-left font-medium">Strategy/Symbol</th>
-                        <th class="min-w-[160px] w-[15%] text-left font-medium">Side/Price</th>
+                        <th class="min-w-[220px] w-[15%] text-left font-medium">Side/Price</th>
                         <th class="min-w-[120px] w-[10%] text-left font-medium">User/Broker</th>
                         <th class="min-w-[100px] w-[5%] text-left font-medium ">Product</th>
                         <th class="min-w-[70px] w-[5%] text-left font-medium">QTY</th>
@@ -27,14 +27,14 @@
                 </thead>
 
                 <tbody>
-                    <tr v-for="(pos, index) in positions" :key="pos.tradeId"
-                        class="flex items-center justify-between text-left w-full p-4 transition-all nrml-text tracking-wider border-b border-white border-opacity-50">
+                    <tr v-for="(pos, index) in filteredPositions" :key="pos.tradeId"
+                        class="flex items-center justify-between text-left w-full px-4 py-3 transition-all nrml-text tracking-wider border-b border-black border-opacity-10">
                         <td class="min-w-[50px] w-[5%]">{{ index + 1 }}</td>
                         <td class="min-w-[160px] w-[15%] font-medium">
                             <p>{{ pos.strategy_name }}</p>
                             <p>{{ pos.strategy_script }}</p>
                         </td>
-                        <td class="min-w-[160px] w-[15%]">
+                        <td class="min-w-[220px] w-[15%]">
                             <div class="flex items-center gap-2 mb-1">
                                 <p class="px-1 rounded font-bold bg-green-100 text-green-600">
                                     B
@@ -116,17 +116,28 @@
 import Popup from '@/components/Popup.vue';
 import { usePositionStore } from '@/stores/positions';
 import { storeToRefs } from 'pinia';
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
+import Tooltip from '@/components/Tooltip.vue';
 
 const positionStore = usePositionStore();
 const { positions , idToSqoff } = storeToRefs(positionStore);
 
 const isPopupOpen = ref(false);
+const searchQuery = ref('');
 
 const togglePopup = (button , id = null) => {
   isPopupOpen.value = button;
   if(id) idToSqoff.value = id;
 };
+
+const filteredPositions = computed(() => {
+  const query = searchQuery.value.trim().toLowerCase();
+  if (!query) return positions.value;
+
+  return positions.value.filter(pos =>
+    pos.user_name.toLowerCase().includes(query)
+  );
+});
 
 function formatDateTime(isoString) {
   const date = new Date(isoString);
@@ -150,8 +161,6 @@ const sqoff = async () => {
   togglePopup(false);
   
 };
-
-
 </script>
 
 <style lang="scss" scoped></style>
