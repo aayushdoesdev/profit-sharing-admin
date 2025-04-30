@@ -293,7 +293,7 @@ const openDetailsModal = (data , date) => {
               <p class="font-semibold">PNL</p>
             </div>
 
-            <div class="flex gap-1 flex-col">
+            <div class="flex gap-1 flex-col h-96 overflow-auto">
               <div v-for="strat in dataToShow.strategy" class="bg-custom-grey p-2 rounded ">
                 <div class="flex justify-between items-center">
 
@@ -317,7 +317,7 @@ const openDetailsModal = (data , date) => {
                   <div v-for="pos in strat.positions" class="border-b border-dashed pb-2">
                     <div class="flex justify-between items-center">
                       <p>{{ pos.strategy_script }}</p>
-                      <p class="font-semibold" :class="{'text-custom-green' : pos.pnl >= 0 , 'text-custom-red' : pos.pnl < 0 }">{{ pos.pnl }}</p>
+                      <p class="font-semibold" :class="{'text-custom-green' : pos.pnl >= 0 , 'text-custom-red' : pos.pnl < 0 }">₹{{ pos.pnl }}</p>
                     </div>
                     <div class="flex flex-col gap-1 mt-2">
                       <div class="flex gap-2 items-center">

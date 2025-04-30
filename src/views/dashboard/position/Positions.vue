@@ -3,7 +3,8 @@
     <div class="flex items-center justify-between px-4 py-4">
       <h2 class="heading-text">Positions</h2>
       <div class="flex items-center gap-4">
-        <p class="heading-text font-medium text-custom-green">+7589</p>
+        <!-- <p class="heading-text font-medium text-custom-green">+7589</p> -->
+         <Totalpnl/>
         <button @click="togglePopup(true)" class="sq-off-btn">
           <i class="pi pi-sync"></i>
           <p>Square Off All</p>
@@ -23,9 +24,9 @@
         <thead class="sticky top-0 z-20">
           <tr
             class="flex items-center justify-between w-full  text-left px-4 py-2 text-[14px] font-light tracking-wide bg-custom-grey text-custom-dark-grey">
-            <th class="min-w-[50px] w-[1%]">
+            <!-- <th class="min-w-[50px] w-[1%]">
               <input type="checkbox" class="w-4 h-4" />
-            </th>
+            </th> -->
             <!-- <th class="w-[5%]">S.NO</th> -->
             <th class="min-w-[200px] w-[20%] font-medium">Strategy</th>
             <th class="min-w-[200px] w-[20%] font-medium">Order type / Price</th>
@@ -40,9 +41,9 @@
             <tr
               class="flex items-center justify-between text-left w-full p-4 transition-all nrml-text font-light tracking-wider border-b border-black border-opacity-10"
               :class="{ 'bg-custom-grey': isOpen === index }">
-              <td class="min-w-[50px] w-[1%]">
+              <!-- <td class="min-w-[50px] w-[1%]">
                 <input type="checkbox" class="w-4 h-4" />
-              </td>
+              </td> -->
               <td class="min-w-[200px] flex items-center gap-2 w-[20%]">
                 <p class="font-medium">{{ strategy.strategy_name }}</p>
                 <p class="bg-[#F3F2F7] px-2 py-1 rounded text-[10px]">
@@ -63,7 +64,7 @@
                   <p>{{ strategy.sell_price }}</p>
                 </div>
               </td>
-              <td class="min-w-[100px] font-medium w-[10%]">500</td>
+              <td class="min-w-[100px] font-medium w-[10%]">{{ calculateStrategyPnl(strategy) }}</td>
               <td class="min-w-[100px] w-[10%]">
                 <p :class="[
                   'px-2 py-[2px] rounded w-fit font-bold',
@@ -88,9 +89,9 @@
             <!-- Expanded Row -->
             <tr v-if="isOpen === index" v-for="(position, i) in strategy.positions" :key="i"
               class="flex items-center justify-between px-4 py-4 nrml-text bg-custom-grey border-b border-black border-opacity-10">
-              <td class="min-w-[50px] w-[1%]">
+              <!-- <td class="min-w-[50px] w-[1%]">
                 <input type="checkbox" class="w-4 h-4" />
-              </td>
+              </td> -->
               <td class="min-w-[200px] flex flex-col items-start gap-2 w-[20%]">
                 <p class="opacity-70">Script / Lot</p>
                 <p class="font-medium">{{ position.tradingsymbol || '-' }}</p>
@@ -105,7 +106,7 @@
                   <p>{{ position.sell_price }}</p>
                 </div>
               </td>
-              <td class="min-w-[100px] font-medium w-[10%]">--</td>
+              <td class="min-w-[100px] font-medium w-[10%]">{{ calculatePositionPnl(position , getLastPrice(position.instrument_token)).pnl }}</td>
               <td class="min-w-[100px] w-[10%]">
                 <p :class="[
                   'px-2 py-1 rounded w-fit font-bold',
@@ -156,11 +157,17 @@
 
 <script setup>
 import Popup from '@/components/Popup.vue';
+import Totalpnl from '@/components/totalpnl.vue';
 import { usePositionStore } from '@/stores/positions';
+import { useTickerStore } from '@/stores/ticker/ticker';
+import { calculatePositionPnl } from '@/utils/pnl';
+import { PowerSquare } from 'lucide-vue-next';
 import { storeToRefs } from 'pinia';
 import { computed, ref } from 'vue';
 
 const positionStore = usePositionStore();
+const tickerStore = useTickerStore();
+const {getLastPrice} = tickerStore;
 const { groupedStrategies, idToSqoff, strategyIdToSqoff } = storeToRefs(positionStore);
 
 const isOpen = ref(null); // null means no open row
@@ -197,6 +204,21 @@ const handleSqoff = async () => {
   isPopupOpen.value = false;
 
 };
+
+const calculateStrategyPnl = (strategy) => {
+  let totalPnl = 0;
+
+  strategy.positions.forEach((position) => {
+    const positionPnl = calculatePositionPnl(position, getLastPrice(position.instrument_token));
+    if (positionPnl && !isNaN(positionPnl.pnl)) {
+      totalPnl += positionPnl.pnl;  // Ensure we are adding valid numbers
+    }
+  });
+
+  return totalPnl.toFixed(2); // Total PnL rounded to 2 decimal places
+};
+
+
 </script>
 
 <style lang="scss" scoped></style>

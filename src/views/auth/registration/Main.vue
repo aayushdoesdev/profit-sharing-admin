@@ -99,7 +99,7 @@ const handleEnterKey = () => {
 <template>
   <section class="flex flex-col md:flex-row items-center min-h-screen font-geist">
     <!-- Left section - Dark background with logo and image -->
-    <div class="hidden lg:block lg:w-1/2 lg:w-[50%] bg-[#1A1919] min-h-[40vh] md:h-screen text-center py-8 px-4 md:px-8">
+    <div class="hidden md:block md:w-1/2 lg:w-[50%] bg-[#1A1919] min-h-[40vh] md:h-screen text-center py-8 px-4 md:px-8">
       <div class="flex items-center justify-center py-4 md:py-10">
         <img src="/svg/logo.svg" alt="Logo" class="h-8 md:h-auto">
       </div>
@@ -116,6 +116,9 @@ const handleEnterKey = () => {
 
     <!-- Right section - Login form -->
     <div class="w-full md:w-1/2 lg:w-[50%] flex flex-col items-center justify-start py-8 px-6 md:px-12 lg:px-32">
+      <div class="flex md:hidden items-center justify-center py-4">
+        <img src="/svg/logo.svg" alt="Logo" class="">
+      </div>
       <h1 class="font-semibold text-3xl md:text-[40px]">Sign In</h1>
 
       <form @submit.prevent="login" @keydown.enter.prevent="handleEnterKey" class="w-full mt-6 space-y-4 max-w-md">
