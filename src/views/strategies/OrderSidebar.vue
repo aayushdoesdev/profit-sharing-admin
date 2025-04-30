@@ -1,6 +1,6 @@
 <template>
   <Transition name="slide">
-    <div v-if="showOrderModal" class="fixed right-0 top-0 h-full w-[350px] md:w-[800px] bg-white shadow-lg z-50 py-2">
+    <div v-if="showOrderModal" class="fixed right-0 top-0 h-full w-full max-w-[800px] bg-white shadow-lg z-50 py-2">
       <div class="flex justify-between items-center mb-2 px-3">
         <h2 class="text-lg font-bold">Strategy Orders</h2>
         <div class="flex gap-2">
@@ -10,24 +10,24 @@
         </div>
       </div>
 
-      <div class="overflow-x-auto">
-        <table class="w-full text-sm">
+      <div class="w-full overflow-x-auto">
+        <table class=" text-sm">
           <thead>
             <tr class="flex items-center justify-between w-full text-left px-3 py-2 text-xs font-bold tracking-wide bg-custom-grey text-custom-dark-grey">
-              <th class="w-[5%] font-medium">#</th>
-              <th class="w-[18%] font-medium">Strategy</th>
-              <th class="w-[20%] font-medium">Side/Price</th>
-              <th class="w-[18%] font-medium">Broker</th>
-              <th class="w-[10%] font-medium">QTY</th>
-              <th class="w-[12%] font-medium">Trigger</th>
-              <th class="w-[8%] font-medium text-center">Status</th>
-              <th class="w-[9%] font-medium text-right">Action</th>
+              <th class="w-[5%] min-w-24 font-medium">#</th>
+              <th class="w-[18%] min-w-24 font-medium">Strategy</th>
+              <th class="w-[20%] min-w-24 font-medium">Side/Price</th>
+              <th class="w-[18%] min-w-24 font-medium">Broker</th>
+              <th class="w-[10%] min-w-24 font-medium">QTY</th>
+              <th class="w-[12%] min-w-24 font-medium">Trigger</th>
+              <th class="w-[8%] min-w-24 font-medium text-center">Status</th>
+              <th class="w-[9%] min-w-24 font-medium text-right">Action</th>
             </tr>
           </thead>
 
           <tbody>
             <tr v-for="(order, index) in strategyOrders" :key="index"
-              class="flex items-center justify-between text-left w-full px-3 py-2 transition-all text-xs tracking-wider border-b border-black border-opacity-10 font-medium">
+              class="flex items-center justify-between text-left w-full px-3 py-2 transition-all text-xs tracking-wider border-b border-black border-opacity-10  font-medium">
               <td class="w-[5%]">{{ index + 1 }}</td>
               <td class="w-[18%]">
                 <p class="truncate">{{ order.strategy_name }}</p>
