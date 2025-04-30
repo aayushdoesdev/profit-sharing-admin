@@ -15,7 +15,6 @@ export const useAlertsStore = defineStore('alerts', () => {
 
             if (response.data) {
                 alerts.value = response.data?.webhook_alerts
-                console.log(alerts.value)
             } else {
                 return alerts.value = []
             }

@@ -17,7 +17,7 @@ const { userTotalProfits } = storeToRefs(positionStore)
 const brokerStore = useBrokerStore();
 
 
-const router = useRouter();
+const searchQuery = ref('');
 const showSidebar = ref(false);
 const currentStep = ref(1); // 1 = Add User, 2 = Add Broker
 
@@ -40,6 +40,15 @@ const usersWithProfits = computed(() => {
       totalUserProfit: profitData ? profitData.totalUserProfit : "0.00",
     };
   });
+});
+
+const filteredUsers = computed(() => {
+  const query = searchQuery.value.trim().toLowerCase();
+  if (!query) return usersWithProfits.value;
+
+  return usersWithProfits.value.filter(user =>
+    user.name.toLowerCase().includes(query)
+  );
 });
 
 // New form data structure matching the payload
@@ -191,7 +200,7 @@ const handleConnect = async (user) => {
     <div class="flex items-center justify-between px-4 nrml-text">
       <div class="bg-custom-grey flex items-center gap-2 w-fit px-4 rounded-md">
         <i class="pi pi-search opacity-50"></i>
-        <input type="text" class="bg-transparent py-2 outline-none" placeholder="Search for user" />
+        <input type="text" v-model="searchQuery" class="bg-transparent py-2 outline-none" placeholder="Search for user" />
       </div>
 
       <div>
@@ -221,7 +230,7 @@ const handleConnect = async (user) => {
         </thead>
 
         <tbody>
-          <tr v-for="(user, index) in usersWithProfits" :key="user.id"
+          <tr v-for="(user, index) in filteredUsers" :key="user.id"
             class="flex items-center justify-between text-left w-full px-4 py-2 transition-all nrml-text tracking-wider border-b border-black border-opacity-10">
             <td class="min-w-[50px] w-[5%]">
               {{ String(index + 1).padStart(2, "0") }}
@@ -284,7 +293,7 @@ const handleConnect = async (user) => {
     <!-- Sidebar Overlay -->
     <transition name="slide">
       <div v-if="showSidebar"
-        class="fixed right-0 top-0 h-full w-[600px] bg-[#F3F2F7] shadow-lg z-50 p-6 overflow-y-auto">
+        class="fixed right-0 top-0 h-full w-full max-w-[600px] bg-[#F3F2F7] shadow-lg z-50 p-6 overflow-y-auto">
         <!-- Header -->
         <div class="flex justify-between items-center mb-4">
           <h2 class="text-xl font-bold">
