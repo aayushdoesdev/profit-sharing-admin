@@ -7,7 +7,7 @@ import { storeToRefs } from 'pinia';
 
 
 const positionStore = usePositionStore()
-const {positions} = storeToRefs(positionStore)
+const {positionCount} = storeToRefs(positionStore)
 
 const strategiesStore = useStrategiesStore()
 const joinerStore = useJoinerStore()
@@ -79,7 +79,7 @@ const {joinerCount} = storeToRefs(joinerStore)
         </div>
         <hr class="border border-dashed" />
         <div class="flex items-center justify-between">
-          <p class="heading-text">460</p>
+          <p class="heading-text">{{ positionCount }}</p>
           <!-- <p class="nrml-text">
             <i class="pi pi-arrow-up text-[12px]"></i>
             1.5%

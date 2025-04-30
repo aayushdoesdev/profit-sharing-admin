@@ -1,6 +1,6 @@
 <script setup>
 import Tooltip from "@/components/Tooltip.vue";
-import { ref, reactive } from "vue";
+import { ref, reactive, computed } from "vue";
 import { useMasterOrderStore } from "@/stores/masterOrders";
 import { useStrategiesStore } from "@/stores/strategies";
 import { storeToRefs } from "pinia";
@@ -14,6 +14,8 @@ const { strategies } = storeToRefs(strategyStore);
 const showSidebar = ref(false);
 const editingStrategyId = ref(null);
 const masterOrderByStrategyId = ref([])
+const searchQuery = ref('');
+
 
 function formatDate(inputDate) {
   const date = new Date(inputDate);
@@ -26,6 +28,16 @@ function formatDate(inputDate) {
     hour12: true, // optional: for AM/PM style, remove if you prefer 24-hour
   });
 }
+
+const filteredMasterOrders = computed(() => {
+  const query = searchQuery.value.trim().toLowerCase();
+  if (!query) return masterorders.value;
+
+  return masterorders.value.filter(order =>
+    order.strategy_name.toLowerCase().includes(query)
+  );
+});
+
 const orderTypes = ["MARKET", "LIMIT", "SL-LIMIT", "SL-MARKET"];
 
 const form = reactive({
@@ -109,6 +121,7 @@ const openEditSidebar = async (order) => {
         <i class="pi pi-search opacity-50"></i>
         <input
           type="text"
+          v-model="searchQuery"
           class="bg-transparent py-1 outline-none"
           placeholder="Search for user"
         />
@@ -128,29 +141,29 @@ const openEditSidebar = async (order) => {
           <tr
             class="flex items-center justify-between w-full text-left px-4 py-2 text-[14px] font-bold tracking-wide bg-custom-grey text-custom-dark-grey"
           >
-            <th class="w-[5%] text-left font-medium">S.NO</th>
-            <th class="w-[15%] font-medium">Strategy / Script</th>
-            <th class="w-[20%] font-medium">Side / Price</th>
-            <th class="w-[15%] font-medium">QTY</th>
-            <th class="w-[10%] font-medium">LTP</th>
-            <th class="w-[10%] font-medium">Trigger Price</th>
-            <th class="w-[10%] font-medium">Status</th>
-            <th class="w-[10%] text-right font-medium">Action</th>
+            <th class="min-w-[50px] w-[5%] text-left font-medium">S.NO</th>
+            <th class="min-w-[180px] w-[15%] font-medium">Strategy / Script</th>
+            <th class="min-w-[180px] w-[20%] font-medium">Side / Price</th>
+            <th class="min-w-[80px] w-[15%] font-medium">QTY</th>
+            <th class="min-w-[80px] w-[10%] font-medium">LTP</th>
+            <th class="min-w-[100px] w-[10%] font-medium">Trigger Price</th>
+            <th class="min-w-[100px] w-[10%] font-medium">Status</th>
+            <th class="min-w-[100px] w-[10%] text-right font-medium">Action</th>
           </tr>
         </thead>
 
         <tbody>
           <tr
-            v-for="(order, index) in masterorders"
+            v-for="(order, index) in filteredMasterOrders"
             :key="order.id"
             class="flex items-center justify-between text-left w-full p-4 transition-all nrml-text tracking-wider border-b border-black border-opacity-10 font-medium"
           >
-            <td class="w-[5%] text-left">{{ index + 1 }}</td>
-            <td class="w-[15%]">
+            <td class="w-[5%] min-w-[50px] text-left">{{ index + 1 }}</td>
+            <td class="w-[15%] min-w-[180px]">
               <p>{{ order.strategy_name }}</p>
               <p>{{ order.strategy_script }}</p>
             </td>
-            <td class="w-[20%]">
+            <td class="w-[20%] min-w-[180px]">
               <div class="flex items-center gap-2">
                 <p
                   :class="[
@@ -171,10 +184,10 @@ const openEditSidebar = async (order) => {
               </div>
             </td>
 
-            <td class="w-[15%]">{{ order.quantity }}</td>
+            <td class="w-[15%] min-w-[80px]">{{ order.quantity }}</td>
             <!-- <td class="w-[10%]">{{ order.ltp }}</td> -->
-            <td class="w-[10%]">{{ order.trigger_price }}</td>
-            <td class="w-[10%]">
+            <td class="w-[10%] min-w-[80px]">{{ order.trigger_price }}</td>
+            <td class="w-[10%] min-w-[100px]">
               <p
                 :class="[
                   'px-4 py-[2px] rounded w-fit',
@@ -186,7 +199,7 @@ const openEditSidebar = async (order) => {
                 {{ order.status }}
               </p>
             </td>
-            <td class="w-[10%] text-center flex justify-end items-center gap-4">
+            <td class="w-[10%] min-w-[100px] text-center flex justify-end items-center gap-4">
               <Tooltip text="Edit">
                 <button
                   @click="openEditSidebar(order)"
@@ -281,12 +294,12 @@ const openEditSidebar = async (order) => {
 
         <!-- Tabs for Order Types -->
         <div class="mb-6 nrml-text">
-          <div class="flex gap-6 border-b">
+          <div class="flex gap-3 border-b">
             <button
               v-for="type in orderTypes"
               :key="type"
               :class="tabButton(type)"
-              class="w-full"
+              class="w-full whitespace-nowrap"
               @click="form.order_type = type"
             >
               {{ type }}

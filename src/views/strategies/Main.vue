@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import Popup from "@/components/Popup.vue";
 import Tooltip from "@/components/Tooltip.vue";
 import { useStrategiesStore } from "@/stores/strategies";
@@ -24,6 +24,7 @@ const editingStrategyId = ref(null);
 const deletingStrategyId = ref(null);
 const deletingJoinerId = ref(null);
 const showOrderModal = ref(false);
+const searchQuery = ref('');
 
 
 const isDeletePopupOpen = ref(false);
@@ -34,6 +35,15 @@ const openEditModal = (joiner) => {
   joinerToEdit.value = joiner;
   showJoinerEditModal.value = true;
 }
+
+const filteredStrategies = computed(() => {
+  const query = searchQuery.value.trim().toLowerCase();
+  if (!query) return strategies.value;
+
+  return strategies.value.filter(strategy =>
+    strategy.name.toLowerCase().includes(query)
+  );
+});
 
 
 const form = ref({
@@ -190,6 +200,13 @@ const handleActive = async (id ,value) => {
     is_active: value
   });
 };
+
+const handleJoinerActive = async (joiner) => {
+  joinerToEdit.value = joiner
+  await joinerStore.editJoiner({
+    is_active: !joiner.is_active
+  });
+};
 </script>
 
 <template>
@@ -200,14 +217,15 @@ const handleActive = async (id ,value) => {
         <i class="pi pi-search opacity-50"></i>
         <input
           type="text"
+          v-model="searchQuery"
           class="bg-transparent py-2 outline-none"
-          placeholder="Search for user"
+          placeholder="Search for strategy"
         />
       </div>
 
       <div>
         <button @click="showSidebar = true" class="flex items-center gap-2 btn">
-          <p>Add New Strategy</p>
+          <p>Add Strategy</p>
           <i class="pi pi-plus"></i>
         </button>
       </div>
@@ -233,7 +251,7 @@ const handleActive = async (id ,value) => {
 
         <tbody>
           <tr
-            v-for="(strategy, index) in strategies"
+            v-for="(strategy, index) in filteredStrategies"
             :key="strategy.id"
             class="flex items-center justify-between text-left w-full p-4 transition-all nrml-text tracking-wider border-b border-black border-opacity-10 font-medium"
           >
@@ -517,6 +535,7 @@ const handleActive = async (id ,value) => {
                     <input
                       type="checkbox"
                       v-model="item.is_active"
+                      @click="handleJoinerActive(item)"
                       class="sr-only peer"
                     />
                     <div

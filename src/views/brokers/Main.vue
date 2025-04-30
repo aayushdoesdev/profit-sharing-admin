@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import { useBrokerStore } from "@/stores/brokers";
 import { storeToRefs } from "pinia";
 import Popup from "@/components/Popup.vue";
@@ -17,6 +17,7 @@ const { brokers, idToEdit } = storeToRefs(brokerStore);
 const showSidebar = ref(false);
 const isDeletePopupOpen = ref(false);
 const brokerDeletingId = ref(null);
+const searchQuery = ref('');
 
 const showHoldingSidebar = ref(false)
 const showOrderPositionSidebar = ref(false)
@@ -72,6 +73,15 @@ const handleDisabled = async (brokerId, value) => {
   idToEdit.value = brokerId;
   const res = await brokerStore.addEdit({ is_active: value });
 };
+
+const filteredBrokers = computed(() => {
+  const query = searchQuery.value.trim().toLowerCase();
+  if (!query) return brokers.value;
+
+  return brokers.value.filter(broker =>
+  broker.broker_name.toLowerCase().includes(query)
+  );
+});
 
 const brokerData = ref({
   broker_userid: "",
@@ -187,8 +197,9 @@ const openOrderPositionSidebar = (broker) => {
         <i class="pi pi-search opacity-50"></i>
         <input
           type="text"
+          v-model="searchQuery"
           class="bg-transparent py-2 outline-none"
-          placeholder="Search for user"
+          placeholder="Search for broker"
         />
       </div>
     </div>
@@ -213,7 +224,7 @@ const openOrderPositionSidebar = (broker) => {
 
         <tbody>
           <tr
-            v-for="(broker, index) in brokers"
+            v-for="(broker, index) in filteredBrokers"
             :key="index"
             class="flex items-center justify-between text-left w-full px-4 py-3 transition-all tracking-wider border-b border-black border-opacity-10 font-medium nrml-text"
           >
@@ -312,7 +323,7 @@ const openOrderPositionSidebar = (broker) => {
     <transition name="slide">
       <div
         v-if="showSidebar"
-        class="fixed right-0 top-0 h-full w-[600px] bg-[#F3F2F7] shadow-lg z-50 p-6 overflow-y-auto"
+        class="fixed right-0 top-0 h-full w-full max-w-[600px] bg-[#F3F2F7] shadow-lg z-50 p-6 overflow-y-auto"
       >
         <div class="flex justify-between items-center mb-4">
           <h2 class="text-xl font-bold">Edit Broker</h2>

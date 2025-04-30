@@ -39,7 +39,7 @@
                     </div>
 
                     <!-- Is Active -->
-                    <div class="mb-6">
+                    <!-- <div class="mb-6">
                         <label class="block text-sm font-medium text-gray-700 mb-1">
                             Is Active
                         </label>
@@ -52,7 +52,7 @@
                                 class="absolute left-0.5 top-0.5 w-4 h-4 bg-white rounded-full transition-transform duration-300 transform peer-checked:translate-x-5">
                             </div>
                         </label>
-                    </div>
+                    </div> -->
 
                     <!-- Buttons -->
                     <div class="flex justify-end space-x-2">
