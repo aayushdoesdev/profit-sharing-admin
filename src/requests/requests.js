@@ -56,8 +56,8 @@ const logout = async () => {
 
   setToken(null);
   localStorage.setItem('token', "");
-  router.push({ name: 'login' });
-  window.location.reload();
+  router.replace({ name: 'login' });
+  // window.location.reload();
 };
 
 
