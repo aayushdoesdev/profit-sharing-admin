@@ -85,16 +85,35 @@ const passwordFields = reactive({
 
 <template>
   <section class="flex items-center min-h-screen font-geist">
-    <div class="w-[50%] bg-gray-700 h-screen"></div>
-    <div class="w-[50%] flex flex-col items-start justify-start py-10 px-32">
-      <router-link to="/login"
-        class="border border-black border-opacity-20 px-2 py-2 rounded-full flex items-center justify-center">
+    <div class="hidden md:block md:w-1/2 bg-[#1A1919] min-h-[50vh] md:h-screen text-center px-4 py-8 md:py-10">
+      <div class="flex items-center justify-center">
+        <img src="/svg/logo.svg" alt="Logo" class="h-10 md:h-auto">
+      </div>
+      
+      <div class="flex items-center flex-col gap-2 mt-6 md:mt-10">
+        <h2 class="leading-tight text-transparent bg-clip-text text-2xl md:text-[38.2px] max-w-xl font-semibold bg-gradient-to-r from-[#387ED1] to-[#ffffff]">
+          One platform. Multiple brokers. Infinite opportunities
+        </h2>
+        <p class="text-sm md:text-[18px] text-[#ADB2B9] font-[400] px-4">
+          Seamlessly manage users, monitor performance, and earn smarter every day.
+        </p>
+      </div>
+      
+      <div class="mt-6 md:mt-10">
+        <img src="/login.png" alt="login" class="max-w-full mx-auto" />
+      </div>
+    </div>
+    <div class="w-full md:w-1/2 flex flex-col items-center justify-start py-8 md:py-10 px-6 md:px-10 lg:px-20 xl:px-32">
+      <div class="flex items-center justify-start gap-4 w-full">
+        <router-link to="/login"
+        class="border border-black border-opacity-20 px-2 py-2 rounded-full flex items-center justify-center w-fit">
         <i class="pi pi-angle-left text-[25px]"></i>
       </router-link>
 
       <div class="text-left">
         <h1 class="font-semibold text-[40px]">Forgot Password</h1>
         <p class="text-[14px] opacity-50">Please enter your email to reset the password</p>
+      </div>
       </div>
 
       <!-- Forgot Password - Email Form -->

@@ -1,10 +1,13 @@
 <script setup>
+import { ref, computed } from "vue";
 import { usePositionHistoryStore } from "@/stores/positionHistory";
 import { storeToRefs } from "pinia";
 import Tooltip from "@/components/Tooltip.vue";
 
 const positionHistoryStore = usePositionHistoryStore();
 const { positionsHistory } = storeToRefs(positionHistoryStore);
+
+const searchQuery = ref('');
 
 function formatDateTime(isoString) {
   const date = new Date(isoString);
@@ -44,6 +47,15 @@ const computedProfit = (pos) => {
   const qty = pos.sell_quantity || pos.buy_quantity || 0;
   return (sell - buy) * qty;
 };
+
+const filteredPositions = computed(() => {
+  const query = searchQuery.value.trim().toLowerCase();
+  if (!query) return positionsHistory.value;
+
+  return positionsHistory.value.filter(position =>
+  position.strategy_name.toLowerCase().includes(query)
+  );
+});
 </script>
 
 <template>
@@ -55,8 +67,9 @@ const computedProfit = (pos) => {
         <i class="pi pi-search opacity-50"></i>
         <input
           type="text"
+          v-model="searchQuery"
           class="bg-transparent py-2 outline-none"
-          placeholder="Search for user"
+          placeholder="Search for strategy"
         />
       </div>
     </div>
@@ -82,7 +95,7 @@ const computedProfit = (pos) => {
 
         <tbody>
           <tr
-            v-for="(pos, index) in positionsHistory"
+            v-for="(pos, index) in filteredPositions"
             :key="pos.tradeId"
             class="flex items-center justify-between text-left w-full px-4 py-3 transition-all nrml-text tracking-wider border-b border-black border-opacity-10"
           >
