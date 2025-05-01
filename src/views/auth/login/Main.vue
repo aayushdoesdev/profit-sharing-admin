@@ -59,6 +59,8 @@ const login = async () => {
 
       if (response) {
         localStorage.setItem("token", `Bearer ${response.data.token}`);
+        setToken(`Bearer ${response.data.token}`);
+        setisAuthenticated(true)
         localStorage.setItem("role", response.data.role);
         localStorage.setItem("refresh", true);
         if (localStorage.getItem('tutorial') == null) {
@@ -101,7 +103,7 @@ const handleEnterKey = () => {
 
 <template>
   <section class="flex flex-col md:flex-row items-center min-h-screen font-geist">
-    <!-- Left side - banner area -->
+   
     <div class="hidden md:block md:w-1/2 bg-[#1A1919] min-h-[50vh] md:h-screen text-center px-4 py-8 md:py-10">
       <div class="flex items-center justify-center">
         <img src="/svg/logo.svg" alt="Logo" class="h-10 md:h-auto">

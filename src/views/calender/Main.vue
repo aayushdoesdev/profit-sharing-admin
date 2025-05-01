@@ -186,7 +186,7 @@ const openDetailsModal = (data , date) => {
 
 <template>
   <!-- {{ formattedData }} -->
-
+  
   <main class="bg-white py-4 h-full overflow-y-auto">
     <div class="px-4">
       <div class="flex items-center gap-4 nrml-text mb-4 whitespace-nowrap">
