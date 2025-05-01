@@ -7,7 +7,7 @@
 
             </div>
         </div>
-        <div class="mt-4 overflow-x-auto">
+        <div class="mt-4 overflow-auto h-[calc(100vh-200px)]">
             <table class="w-[99%]">
                 <thead>
                     <tr
@@ -60,7 +60,7 @@
                         <td class="min-w-[100px] w-[10%] flex justify-end text-[12px]">
                             <p :class="[
                                 'px-4 py-[2px] rounded w-fit',
-                                order.status.toLowerCase() === 'open'
+                                order.status.toLowerCase() === 'complete'
                                     ? 'bg-green-100 text-green-600'
                                     : 'bg-yellow-100 text-yellow-700',
                             ]">
@@ -71,8 +71,8 @@
                             <Tooltip text="View">
                                 <button class="pi pi-eye text-[16px]"></button>
                             </Tooltip>
-                            <Tooltip text="Delete">
-                                <button class="pi pi-trash text-red-500 text-[16px]"></button>
+                            <Tooltip v-if="order.status.toLowerCase() != 'complete'" text="Delete">
+                                <button  class="pi pi-trash text-red-500 text-[16px]"></button>
                             </Tooltip>
                         </td>
                     </tr>

@@ -70,12 +70,12 @@
                             </p>
                         </td>
                         <td class="min-w-[80px] w-[5%] ">
-                            <p class="text-green-600 font-bold">
-                                {{ pos.profit }}
+                            <p class="font-bold" :class="{'text-custom-red' : calculatePositionPnl( pos , getLastPrice(pos.instrument_token)).pnl < 0 , 'text-custom-green' : calculatePositionPnl( pos , getLastPrice(pos.instrument_token)).pnl >= 0 }">
+                                ₹{{ calculatePositionPnl( pos , getLastPrice(pos.instrument_token)).pnl }}
                             </p>
                         </td>
                         <td class="min-w-[120px] w-[10%] flex justify-end items-center gap-2 ">
-                            <button @click="togglePopup(true , pos.id)" class="sq-off-btn flex items-center gap-1">
+                            <button v-if="pos.status.toLowerCase() == 'open'" @click="togglePopup(true , pos.id)" class="sq-off-btn flex items-center gap-1">
                                 <i class="pi pi-sync"></i>
                                 <p>Sq Off</p>
                             </button>
@@ -118,8 +118,12 @@ import { usePositionStore } from '@/stores/positions';
 import { storeToRefs } from 'pinia';
 import { ref, computed } from 'vue';
 import Tooltip from '@/components/Tooltip.vue';
+import { useTickerStore } from '@/stores/ticker/ticker';
+import { calculatePositionPnl } from '@/utils/pnl';
 
 const positionStore = usePositionStore();
+const tickerStore = useTickerStore();
+const {getLastPrice} = tickerStore;
 const { positions , idToSqoff } = storeToRefs(positionStore);
 
 const isPopupOpen = ref(false);
