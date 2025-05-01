@@ -1,186 +1,270 @@
 <script setup>
-import { ref, reactive } from "vue";
-import { RouterLink, useRouter } from "vue-router";
-// import { useTickerStore } from "@/stores/matrix/ticker/ticker";
-import { required, email, minLength } from "@vuelidate/validators";
-import useVuelidate from "@vuelidate/core";
-import {
-  makeRequest,
-  setToken,
-  setisAuthenticated,
-  state,
-} from "@/requests/requests";
+import { RouterLink, useRouter } from 'vue-router';
+import { reactive, ref, toRefs } from 'vue';
+import { useVuelidate } from '@vuelidate/core';
+import { required, minLength, email, integer } from '@vuelidate/validators';
+import { EyeIcon, EyeOffIcon, AlertTriangleIcon } from 'lucide-vue-next';
 
-const router = useRouter()
+// Import your makeRequest function - update path as needed
+import { makeRequest, state } from '@/requests/requests';
 
-const checkTnC = ref(false);
+const router = useRouter();
 
-const loginFormData = reactive({
-  email: "",
-  password: "",
+let passwordFields = reactive({
+  showPassword: false,
+  showConfirmPassword: false,
 });
 
-const errors = ref({});
-const errorMsg = ref("");
-const requested = ref(false);
+function togglePasswordVisibility(field) {
+  passwordFields[field] = !passwordFields[field];
+}
 
-// Validation rules
-const loginFormRules = {
-  email: { required, email },
-  password: { required },
+let formData = reactive({
+  "name": "",
+  "email": "",
+  "password": "",
+  "confirm_password": "",
+  "mobile": "",
+  "isAgree": false,
+});
+
+let otpVerifyData = reactive({
+  "otp": "",
+});
+
+const rules = {
+  name: {
+    required,
+    minLength: minLength(4),
+  },
+  email: {
+    required,
+    email,
+  },
+  password: {
+    required,
+    minLength: minLength(6),
+  },
+  confirm_password: {
+    required,
+    sameAsPassword: (value) => {
+      return value === formData.password;
+    },
+  },
+  mobile: {
+    integer,
+    required,
+    minLength: minLength(10),
+  },
+  isAgree: {
+    required,
+  }
 };
 
-// Use Vuelidate for validation
-const v$ = useVuelidate(loginFormRules, loginFormData);
-
-const login = async () => {
-  v$.value.$touch();
-  if (v$.value.$invalid) {
-    errors.value.email = v$.value.email.$error
-      ? "Please enter a valid email."
-      : "";
-    errors.value.password = v$.value.password.$error
-      ? "Password must be at least 6 characters long."
-      : "";
-    return;
+const otpRules = {
+  otp: {
+    required,
+    minLength: minLength(4),
   }
-  if (!v$.value.$invalid) {
-    try {
-      requested.value = true;
-      const response = await makeRequest(
-        'login',
-        'POST',
-        loginFormData,
-        {},
-        {},
-        0,
-        null
-      );
+};
 
-      if (response) {
-        localStorage.setItem("token", `Bearer ${response.data.token}`);
-        localStorage.setItem("role", response.data.role);
-        localStorage.setItem("refresh", true);
-        if (localStorage.getItem('tutorial') == null) {
-          localStorage.setItem("tutorial", true);
-        }
-        
-        errorMsg.value = "";
-        setisAuthenticated(true, response.data.user_role);
+const validate = useVuelidate(rules, toRefs(formData));
+const validateOtp = useVuelidate(otpRules, toRefs(otpVerifyData));
 
-        // Navigate to dashboard 
-        const redirectPage = localStorage.getItem('redirectAfterLogin');
-        
-        if(redirectPage){
-          checkRedirectAfterLogin();
-        } else{
-          router.push("/")
-        }
-      } else {
-        errorMsg.value = state["login"].error?.message;
-      }
-    } catch (error) {
-      errorMsg.value = state["login"].error?.message;
-      if (!errorMsg.value) {
-        errorMsg.value = "An error occurred while logging in. Please try again later."
-      }
-      console.error("Login error: ", error);
-    } finally {
-      requested.value = false;
+const error = ref("");
+const idForOtpVerify = ref(null);
+
+const submitForm = async () => {
+  validate.value.$touch();
+  if (!validate.value.$invalid) {
+    const response = await makeRequest("register", "POST", { name: formData.name, email: formData.email, password: formData.password, mobile: formData.mobile }, {}, {}, 0, null);
+    if (response) {
+      idForOtpVerify.value = response.data;
+    } else {
+      error.value = state.error.response.data.message;
     }
   }
 };
+const checkTnC = ref(false);
+const submitVerifyOtp = async () => {
+  validateOtp.value.$touch();
+  if (!validateOtp.value.$invalid) {
 
-const handleEnterKey = () => {
-  login();
+    const responseVerify = await makeRequest("adminOtp", "POST", otpVerifyData);
+    if (responseVerify) {
+      router.push("/")
+    } else {
+      error.value = state.error.response.data.message;
+    }
+  }
 };
 </script>
 
 <template>
-  <section class="flex flex-col md:flex-row items-center min-h-screen font-geist">
-    <!-- Left section - Dark background with logo and image -->
-    <div class="hidden md:block md:w-1/2 lg:w-[50%] bg-[#1A1919] min-h-[40vh] md:h-screen text-center py-8 px-4 md:px-8">
-      <div class="flex items-center justify-center py-4 md:py-10">
-        <img src="/svg/logo.svg" alt="Logo" class="h-8 md:h-auto">
+  <section class="flex items-start min-h-screen font-geist">
+    <div class="hidden overflow-hidden md:block md:w-1/2 bg-[#1A1919] min-h-[50vh] md:h-screen text-center px-4 py-8 md:py-10">
+      <div class="flex items-center justify-center">
+        <img src="/svg/logo.svg" alt="Logo" class="h-10 md:h-auto">
       </div>
-      <div class="flex items-center flex-col gap-2 mx-auto max-w-md">
-        <h2 class="leading-tight text-transparent bg-clip-text text-2xl md:text-[38.2px] max-w-xl font-semibold bg-gradient-to-r from-[#387ED1] to-[#ffffff]">
+
+      <div class="flex items-center flex-col gap-2 mt-6 md:mt-10">
+        <h2
+          class="leading-tight text-transparent bg-clip-text text-2xl md:text-[38.2px] max-w-xl font-semibold bg-gradient-to-r from-[#387ED1] to-[#ffffff]">
           One platform. Multiple brokers. Infinite opportunities
         </h2>
-        <p class="text-sm md:text-[18px] text-[#ADB2B9] font-[400]">Seamlessly manage users, monitor performance, and earn smarter every day.</p>
+        <p class="text-sm md:text-[18px] text-[#ADB2B9] font-[400] px-4">
+          Seamlessly manage users, monitor performance, and earn smarter every day.
+        </p>
       </div>
-      <div class="mt-4 md:mt-8">
-        <img src="/login.png" alt="login" class="max-w-full h-auto mx-auto" />
+
+      <div class="mt-6 md:mt-10">
+        <img src="/signup.png" alt="login" class="max-w-full mx-auto object-contain" />
       </div>
     </div>
-
-    <!-- Right section - Login form -->
-    <div class="w-full md:w-1/2 lg:w-[50%] flex flex-col items-center justify-start py-8 px-6 md:px-12 lg:px-32">
+    <div class="w-full md:w-1/2 flex flex-col items-center justify-start py-8 md:py-10 px-6 md:px-10 lg:px-20 xl:px-32">
       <div class="flex md:hidden items-center justify-center py-4">
         <img src="/svg/logo.svg" alt="Logo" class="">
       </div>
-      <h1 class="font-semibold text-3xl md:text-[40px]">Sign In</h1>
+      <h1 class="font-semibold text-2xl md:text-[40px]">Create an account</h1>
 
-      <form @submit.prevent="login" @keydown.enter.prevent="handleEnterKey" class="w-full mt-6 space-y-4 max-w-md">
-        <div class="space-y-1">
-          <p>Email</p>
-          <input
-            type="text"
-            placeholder="Enter your email" 
-            v-model="loginFormData.email"
-            class="w-full border border-black border-opacity-40 py-2 rounded-md outline-none px-4 bg-transparent"
-          />
-          <p v-if="errors.email" class="text-red-500 text-sm">
-            {{ errors.email }}
-          </p>
-        </div>
-        
-        <div class="space-y-1">
-          <p>Password</p>
-          <input
-            type="password"
-            v-model="loginFormData.password"
-            placeholder="Enter Password"
-            class="w-full border border-black border-opacity-40 py-2 rounded-md outline-none px-4 bg-transparent"
-          />
-          <p v-if="errors.password" class="text-red-500 text-sm">
-            {{ errors.password }}
-          </p>
-          <p v-if="errorMsg" class="text-red-500 text-sm">
-            {{ errorMsg }}
-          </p>
-        </div>
-        
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between text-[12px] gap-2">
-          <div class="flex items-center gap-2">
-            <input type="checkbox" v-model="checkTnC" class="h-4 w-4"/>
-            <p>I agree the <a href="#" class="hover:underline text-custom-blue">XYZ T&C</a> and <a href="#" class="hover:underline text-custom-blue">Privacy Policy</a></p>
+      <div v-if="error" class="w-full mt-4 text-red-500 flex items-center">
+        <AlertTriangleIcon class="w-4 h-4 mr-2" /> {{ error }}
+      </div>
+
+      <template v-if="!idForOtpVerify">
+        <form class="w-full mt-6 space-y-4" @submit.prevent="submitForm">
+          <div class="space-y-1">
+            <p>Full name</p>
+            <input id="name" name="name" v-model.trim="validate.name.$model" type="text"
+              placeholder="Enter name e.g- Roshni chandra" :class="{ 'border-red-500': validate.name.$error }"
+              class="w-full border border-black border-opacity-40 py-2 rounded-md outline-none px-4 bg-transparent" />
+            <template v-if="validate.name.$error">
+              <div v-for="error of validate.name.$errors" :key="error.$uid" class="text-red-500 text-sm mt-1">
+                {{ error.$message }}
+              </div>
+            </template>
           </div>
 
-          <router-link to="/forgot-password" class="text-blue-500 font-semibold">Forget Password</router-link>
-        </div>
+          <div class="space-y-1">
+            <p>Email</p>
+            <input id="email" name="email" v-model.trim="validate.email.$model" type="text"
+              placeholder="Enter your email address" :class="{ 'border-red-500': validate.email.$error }"
+              class="w-full border border-black border-opacity-40 py-2 rounded-md outline-none px-4 bg-transparent" />
+            <template v-if="validate.email.$error">
+              <div v-for="error of validate.email.$errors" :key="error.$uid" class="text-red-500 text-sm mt-1">
+                {{ error.$message }}
+              </div>
+            </template>
+          </div>
 
-        <button 
-          type="submit" 
-          :disabled="!checkTnC" 
-          :class="['w-full py-2 rounded-md', checkTnC ? 'bg-[#387ED1] text-white' : 'bg-gray-300 text-gray-500']"
-        >
-          Submit
-        </button>
+          <div class="space-y-1">
+            <p>Number</p>
+            <input id="mobile" name="mobile" v-model.trim="validate.mobile.$model" type="text"
+              placeholder="Enter your mobile number" :class="{ 'border-red-500': validate.mobile.$error }"
+              class="w-full border border-black border-opacity-40 py-2 rounded-md outline-none px-4 bg-transparent" />
+            <template v-if="validate.mobile.$error">
+              <div v-for="error of validate.mobile.$errors" :key="error.$uid" class="text-red-500 text-sm mt-1">
+                {{ error.$message }}
+              </div>
+            </template>
+          </div>
 
-        <p class="text-center opacity-50">
-          Don't have a account?
-          <router-link class="opacity-100 font-semibold" to="/register">Register</router-link>
-        </p>
-      </form>
+          <div class="space-y-1">
+            <p>Password</p>
+            <div class="relative">
+              <input id="password" name="password" v-model.trim="validate.password.$model"
+                :type="passwordFields.showPassword ? 'text' : 'password'" placeholder="Enter your password"
+                :class="{ 'border-red-500': validate.password.$error }"
+                class="w-full border border-black border-opacity-40 py-2 rounded-md outline-none px-4 bg-transparent" />
+              <span @click="togglePasswordVisibility('showPassword')"
+                class="absolute right-4 top-1/2 transform -translate-y-1/2 cursor-pointer">
+                <EyeOffIcon v-if="passwordFields.showPassword" class="w-5 h-5" />
+                <EyeIcon v-else class="w-5 h-5" />
+              </span>
+            </div>
+            <template v-if="validate.password.$error">
+              <div v-for="error of validate.password.$errors" :key="error.$uid" class="text-red-500 text-sm mt-1">
+                {{ error.$message }}
+              </div>
+            </template>
+            <div class="w-full grid grid-cols-12 gap-4 h-1 mt-3" v-if="formData.password">
+              <div class="col-span-3 h-full rounded"
+                :class="formData.password.length < 6 ? 'bg-red-500' : formData.password.length < 9 ? 'bg-yellow-500' : 'bg-green-500'">
+              </div>
+              <div class="col-span-3 h-full rounded"
+                :class="formData.password.length > 8 ? 'bg-green-500' : formData.password.length > 5 ? 'bg-yellow-500' : 'bg-gray-200'">
+              </div>
+              <div class="col-span-3 h-full rounded"
+                :class="formData.password.length < 9 ? 'bg-gray-200' : 'bg-green-500'">
+              </div>
+            </div>
+            <span v-if="formData.password.length >= 6"
+              :class="formData.password.length < 9 ? 'text-yellow-600' : 'text-green-600'" class="block mt-2 text-xs">
+              {{ formData.password.length < 9 ? 'Your password is of average length, keep it up!'
+                : 'Your password is a good length, well done!' }} </span>
+          </div>
+
+          <div class="space-y-1">
+            <p>Confirm Password</p>
+            <div class="relative">
+              <input id="confirm_password" name="confirm_password" v-model.trim="validate.confirm_password.$model"
+                :type="passwordFields.showConfirmPassword ? 'text' : 'password'" placeholder="Confirm your password"
+                :class="{ 'border-red-500': validate.confirm_password.$error }"
+                class="w-full border border-black border-opacity-40 py-2 rounded-md outline-none px-4 bg-transparent" />
+              <span @click="togglePasswordVisibility('showConfirmPassword')"
+                class="absolute right-4 top-1/2 transform -translate-y-1/2 cursor-pointer">
+                <EyeOffIcon v-if="passwordFields.showConfirmPassword" class="w-5 h-5" />
+                <EyeIcon v-else class="w-5 h-5" />
+              </span>
+            </div>
+            <template v-if="validate.confirm_password.$error">
+              <div class="text-red-500 text-sm mt-1">
+                Password and Confirm Password should match
+              </div>
+            </template>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <input type="checkbox" v-model="checkTnC" id="tnc" class="cursor-pointer"/>
+            <label for="tnc" class="cursor-pointer">
+              I agree the <a href="" class="hover:underline text-custom-blue">XYZ T&C</a> and <a href="" class="hover:underline text-custom-blue">Privacy Policy</a>
+            </label>
+          </div>
+          <template v-if="validate.isAgree.$error">
+            <div class="text-red-500 text-sm mt-1">
+              You must agree to the terms and conditions
+            </div>
+          </template>
+
+          <button :disabled="!checkTnC" type="submit"
+          :class="['w-full py-2 rounded-md', checkTnC ? 'bg-[#387ED1] text-white' : 'bg-gray-300 text-gray-500 cursor-not-allowed']">
+            Submit
+          </button>
+
+          <p class="text-center opacity-50">Already a member? <router-link class="opacity-100 font-semibold"
+              to="/login">Login</router-link></p>
+        </form>
+      </template>
+
+      <template v-else>
+        <form class="w-full mt-6 space-y-4" @submit.prevent="submitVerifyOtp">
+          <div class="space-y-1">
+            <p>OTP Verification</p>
+            <input id="otp" name="otp" v-model.trim="validateOtp.otp.$model" type="text"
+              placeholder="Enter your 6 digit email OTP" :class="{ 'border-red-500': validateOtp.otp.$error }"
+              class="w-full border border-black border-opacity-40 py-2 rounded-md outline-none px-4 bg-transparent" />
+            <template v-if="validateOtp.otp.$error">
+              <div v-for="error of validateOtp.otp.$errors" :key="error.$uid" class="text-red-500 text-sm mt-1">
+                {{ error.$message }}
+              </div>
+            </template>
+          </div>
+
+          <button type="submit" class="bg-[#387ED1] w-full text-white py-2 rounded-md">
+            Verify OTP
+          </button>
+        </form>
+      </template>
     </div>
   </section>
 </template>
-
-<style scoped>
-@media (max-width: 768px) {
-  section {
-    overflow-x: hidden;
-  }
-}
-</style>
