@@ -1,11 +1,13 @@
 <script setup>
+import { ref,computed } from "vue";
 import { useOrderHistoryStore } from "@/stores/orderHistory";
 import { storeToRefs } from "pinia";
 import Tooltip from "@/components/Tooltip.vue";
 
 const orderHistoryStore = useOrderHistoryStore();
-
 const { ordersHistory } = storeToRefs(orderHistoryStore);
+
+const searchQuery = ref('');
 
 function formatDateTime(isoString) {
   const date = new Date(isoString);
@@ -38,6 +40,15 @@ function formatDateTime(isoString) {
     .toString()
     .padStart(2, "0")} ${month}`;
 }
+
+const filteredOrders = computed(() => {
+  const query = searchQuery.value.trim().toLowerCase();
+  if (!query) return ordersHistory.value;
+
+  return ordersHistory.value.filter(order =>
+  order.strategy_name.toLowerCase().includes(query)
+  );
+});
 </script>
 
 <template>
@@ -48,8 +59,9 @@ function formatDateTime(isoString) {
       <i class="pi pi-search opacity-50"></i>
       <input
         type="text"
+        v-model="searchQuery"
         class="bg-transparent py-2 outline-none"
-        placeholder="Search for user"
+        placeholder="Search for strategy"
       />
     </div>
   </div>
@@ -73,7 +85,7 @@ function formatDateTime(isoString) {
 
       <tbody>
         <tr
-          v-for="(order, index) in ordersHistory"
+          v-for="(order, index) in filteredOrders"
           class="flex items-center justify-between text-left w-full p-4 transition-all nrml-text tracking-wider border-b border-black border-opacity-10 font-medium"
         >
           <td class="min-w-[50px] w-[5%]">{{ index + 1 }}</td>
